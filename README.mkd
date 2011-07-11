@@ -1,0 +1,5 @@
+tget is a simple command line utility to search torrent sites and download torrents listed in its config file.
+
+We have a [Design Doc on the wiki](https://github.com/jeffWelling/tget/wiki/Design-Doc).
+
+More documentation coming soon.
