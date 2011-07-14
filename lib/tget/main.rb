@@ -84,5 +84,10 @@ module Tget
         }
       }
     end
+    def alread_have?( title, uid )
+
+    end
+    def get_uid( title )
+    end
   end
 end
