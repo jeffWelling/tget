@@ -7,4 +7,4 @@ if File.exist? File.join(File.dirname(__FILE__), '..', 'lib', 'tget.rb')
 end
 require 'tget'
 
-Tget.run
+Tget.start
