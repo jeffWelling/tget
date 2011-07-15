@@ -5,6 +5,7 @@ module Tget
     # {100=>{piratebay},
     #  102=>{eztv}}
     def initialize
+      @@options={}
       MAX_PRIO.times {|i|
         Find.find( File.join(File.expand_path(File.dirname(__FILE__)), "scrapers/#{i}/")) {|s|
           next unless s[/\.rb$/]
@@ -16,7 +17,8 @@ module Tget
       }
     end
     def run(options)
-      puts "Debugging output enabled" if options['debug']
+      @@options=options
+      debug "Debugging output enabled"
       #load config
       listing_shows=true
       shows=[]
@@ -31,8 +33,8 @@ module Tget
       while( line=file.gets )
         if listing_shows==true
           (listing_shows=false and next) if line[/### Options ###/]
-          shows << line
-          puts "Adding show '#{line.strip}'" if options['debug']
+          shows << line.strip
+          debug "Adding show '#{line.strip}'"
         else
           config[line[/^[^=]*/]]=line.gsub(/^[^=]*=/,'').strip
         end
@@ -50,19 +52,25 @@ module Tget
           #This allows multiple scrapers within the same priority
           #but does not guarantee an order for said scrapers.
           SCRAPERS[i].each {|scraper|
-            puts "scraper"
-            pp scraper.gsub(/(\.(.){2,3}){1,2}$/,'')
+            debug "Working with #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')}"
+
             extend Tget.const_get(scraper.gsub(/(\.(.){2,3}){1,2}$/,''))
             shows.each {|show|
-              results << search(show)
+              debug "Searching #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')} for #{show}..."
+              r=search(show)
+              debug "Found #{r.size rescue 0} results"
+
+              results << r
             }
           }
         end
       }
-      results=results.compact
+      results=results.flatten.compact
 
-      puts "Results:"
-      pp results
+      debug "Results:"
+      if options['debug']
+        pp results
+      end
 
       #download file
       if options['download_dir'][/\/$/].nil?
@@ -72,22 +80,50 @@ module Tget
       end
       FileUtils.mkdir_p(download_dir) unless File.exist?(download_dir)
       results.each {|result|
+        timedout=0
+        conn_refused=0
         domain=result.download[/^(http:\/\/)?[^\/]*\//].gsub(/http:\/\//i,'').gsub(/\/$/,'')
-        puts "Connecting to #{domain} to download:\n#{result.download}" if options['debug']
-        Net::HTTP.start( domain ) {|http|
-          resp= http.get( result.download.gsub(/^(http:\/\/)?[^\/]*\//i,'') )
-          puts `pwd`
-          puts Dir.pwd
-          open( download_dir + File.basename(result.download), 'wb' ) {|file|
-            file.write(resp.body)
+        begin
+          debug "Connecting to #{domain} to download:\n#{result.download}"
+          Net::HTTP.start( domain ) {|http|
+            resp= http.get( result.download.gsub(/^(http:\/\/)?[^\/]*\//i,'') )
+            if File.basename(result.download).include?('.torrent')
+              basename= File.basename(result.download)
+            else
+              basename= rand(999999999).to_s + ".torrent"
+            end
+            open( download_dir + basename, 'wb' ) {|file|
+              if file.write(resp.body)
+                debug "Saved." 
+                Tget::DList.add "#{result.show} - #{result.ep_id}"
+              end
+            }
           }
-        }
+        rescue Errno::ECONNREFUSED => e
+          next if conn_refused > 0
+          debug "Connection Refused, retrying (#{conn_refused+1})..."
+          conn_refused+=1
+          retry
+        rescue Errno::ECONNRESET, Errno::ETIMEDOUT => e
+          next if timedout > 0
+          debug "Connection Reset/Timed out, retrying (#{timedout+1})..."
+          timedout+=1
+          retry
+        end
       }
     end
-    def alread_have?( title, uid )
-
+    def debug str
+      puts str if @@options['debug']
     end
-    def get_uid( title )
+    def get_uid show, str
+      debug "Getting UID for '#{str}'"
+      if str[/s(\d){1,2}e(\d){1,3}/i]
+        return str[/s(\d){1,2}e(\d){1,3}/i]
+      elsif str[/(\d){4}[ \.-](\d){1,2}[ \.-](\d){1,2}/]
+        return str[/(\d){4}[ \.-](\d){1,2}[ \.-](\d){1,2}/]
+      else
+        return str.gsub(show,'').gsub(/\[[^\[]+\]/,'')
+      end
     end
   end
 end

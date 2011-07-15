@@ -10,19 +10,24 @@ require 'pp'
 require 'find'
 require 'tget/main'
 require 'tget/result'
+require 'tget/dlist'
 module Tget
   autoload :VERSION, 'tget/version'
-
   def self.start
     options={}
     options['debug']=false
     options['download_dir']=File.expand_path("~/Downloads/torrents/")
     options['config_file']=File.expand_path("~/.tget_cfg")
+    options['downloaded_files']=File.expand_path("~/.downloaded_files")
     opts= OptionParser.new do |opts|
       opts.banner= "tget is a command line .torrent downloader"
 
       opts.on("--download-to [DIR]", "Directory to download .torrent files to") do |dir|
         options['download_dir']= dir
+      end
+
+      opts.on("--downloaded_files [PATH]", "Path to substitude downloaded_files list instead of ~/.downloaded_files") do |path|
+        options['downloaded_files']= path
       end
 
       opts.on("--config [PATH]", "Path of config file to use instead of default") do |path|
@@ -42,6 +47,12 @@ module Tget
       end
     end
     opts.parse!
-    Tget::Main.new.run( options )
+    begin
+      @@options=options
+      Tget::DList.new options['downloaded_files']
+      Tget::Main.new.run( options )
+    ensure
+      Tget::DList.save options['downloaded_files']
+    end
   end
 end
