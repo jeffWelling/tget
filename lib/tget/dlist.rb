@@ -15,6 +15,8 @@ module Tget
     def self.add event
       puts "DList.add '#{event}'"
       unless (event.class==String and is_formatted?(event))
+        puts "event is not a string" unless event.class==String
+        puts "event is not formatted properly" unless is_formatted?(event)
         raise ArgumentError
       end
       @@downloaded_files << event
@@ -41,13 +43,16 @@ module Tget
       } rescue nil
     end
 
-    private
     def self.is_formatted? line
+      require 'pp'
+      pp line.split(DLIST_SEP)
+      puts 
       begin
-        if ((line.split('-').length == 2) and (line.split('-')[1][/s(\d){1,2}e(\d){1,2}/i] || 
-                                               line.split('-')[1][/(\d){4}\s(\d){1,2}\s(\d){1,2}/i] ))
+        if ((line.split(DLIST_SEP).length >= 2) and (line.split(DLIST_SEP)[1][/s(\d){1,2}e(\d){1,2}/i] || 
+                                               line.split(DLIST_SEP)[1][EPID_REGEX] ))
             return true
         end
+        return false
       rescue
         return false
       end

@@ -56,8 +56,16 @@ module Tget
 
             extend Tget.const_get(scraper.gsub(/(\.(.){2,3}){1,2}$/,''))
             shows.each {|show|
+              retries=0
               debug "Searching #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')} for #{show}..."
-              r=search(show)
+              begin
+                r=search(show)
+              rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError 
+                next if retries > MAX_RETRIES
+                debug "Connection failed, trying again... (Attempt ##{retries+1})"
+                retries+=1
+                retry
+              end
               debug "Found #{r.size rescue 0} results"
 
               results << r
@@ -94,18 +102,18 @@ module Tget
             end
             open( download_dir + basename, 'wb' ) {|file|
               if file.write(resp.body)
-                debug "Saved." 
-                Tget::DList.add "#{result.show} - #{result.ep_id}"
+                debug "Saved #{basename}." 
+                Tget::DList.add "#{result.show} #{DLIST_SEP} #{result.ep_id}"
               end
             }
           }
         rescue Errno::ECONNREFUSED => e
-          next if conn_refused > 0
+          next if conn_refused >= MAX_RETRIES
           debug "Connection Refused, retrying (#{conn_refused+1})..."
           conn_refused+=1
           retry
         rescue Errno::ECONNRESET, Errno::ETIMEDOUT => e
-          next if timedout > 0
+          next if timedout >= MAX_RETRIES
           debug "Connection Reset/Timed out, retrying (#{timedout+1})..."
           timedout+=1
           retry
@@ -114,16 +122,6 @@ module Tget
     end
     def debug str
       puts str if @@options['debug']
-    end
-    def get_uid show, str
-      debug "Getting UID for '#{str}'"
-      if str[/s(\d){1,2}e(\d){1,3}/i]
-        return str[/s(\d){1,2}e(\d){1,3}/i]
-      elsif str[/(\d){4}[ \.-](\d){1,2}[ \.-](\d){1,2}/]
-        return str[/(\d){4}[ \.-](\d){1,2}[ \.-](\d){1,2}/]
-      else
-        return str.gsub(show,'').gsub(/\[[^\[]+\]/,'')
-      end
     end
   end
 end

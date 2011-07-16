@@ -11,6 +11,9 @@ require 'find'
 require 'tget/main'
 require 'tget/result'
 require 'tget/dlist'
+require 'tget/episodeid.rb'
+DLIST_SEP="#GNU_FTW#"
+MAX_RETRIES=0
 module Tget
   autoload :VERSION, 'tget/version'
   def self.start
