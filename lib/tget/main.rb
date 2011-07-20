@@ -90,11 +90,26 @@ module Tget
       results.each {|result|
         timedout=0
         conn_refused=0
+        if File.basename(result.download).include?('.torrent')
+          basename= File.basename(result.download)
+        else
+          basename= rand(999999999).to_s + ".torrent"
+        end
+        File.open( File.join(download_dir, basename), 'wb' ) {|file| file.write open(result.download.gsub("[", "%5B").gsub("]", "%5D")).read }
+=begin
         domain=result.download[/^(http:\/\/)?[^\/]*\//].gsub(/http:\/\//i,'').gsub(/\/$/,'')
         begin
           debug "Connecting to #{domain} to download:\n#{result.download}"
           Net::HTTP.start( domain ) {|http|
+            puts url=result.download.gsub(/^(http:\/\/)?[^\/]*\//i,'')
+            url=url.gsub("[", "%5B").gsub("]", "%5D")
+            puts url
             resp= http.get( result.download.gsub(/^(http:\/\/)?[^\/]*\//i,'') )
+            if resp.to_s.gsub(/bad request/i,'')
+              debug "Download failed -- bad request, retrying..."
+              resp=http.get(url)
+              debug "Download failed again...." if resp.to_s.gsub(/bad request/i,'')
+            end
             if File.basename(result.download).include?('.torrent')
               basename= File.basename(result.download)
             else
@@ -118,6 +133,7 @@ module Tget
           timedout+=1
           retry
         end
+=end
       }
     end
     def debug str

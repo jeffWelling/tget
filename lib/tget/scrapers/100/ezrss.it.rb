@@ -1,5 +1,4 @@
 require 'rss'
-require 'open-uri'
 module Tget
   module Ezrss
     RSS_FEED="http://ezrss.it/feed/"
