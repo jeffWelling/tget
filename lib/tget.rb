@@ -51,6 +51,7 @@ module Tget
       end
     end
     opts.parse!
+
     begin
       @@options=options
       Tget::DList.new options['downloaded_files']
