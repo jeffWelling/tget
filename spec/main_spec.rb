@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/spec_helper"
 
-describe Tget::Mainn do
+describe Tget::Main do
   include TgetSpecHelper
 
 =begin
