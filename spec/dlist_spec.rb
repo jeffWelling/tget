@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + "/spec_helper"
-describe Tget::Dlist do
+describe Tget::DList do
   
   it "Should initialize to contents of file"
   it "Should add shows"

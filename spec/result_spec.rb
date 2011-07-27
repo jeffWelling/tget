@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + "/spec_helper"
-describe Tget::Result
+describe Tget::Result do
 
   it "Should initialize, given appropriate input"
   it "Should be able to tell which show it is"
