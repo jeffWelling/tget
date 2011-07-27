@@ -1,4 +1,6 @@
 module Tget
+  #This class is to help turn abitrary data intto a dataset we can use
+  #A Result object is created per result returned from the scrapers
   class Result
     def initialize(url, show, ep_id)
       @download_url=url
