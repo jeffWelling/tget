@@ -19,6 +19,9 @@ describe Tget::Main do
 
   it "Should load scrapers into prioritized list"
   it "Should not load scrapers with prio above MAX_PRIO"
+  it "Should exit politely if no config file is found"
+  it "Should load scrapers from options['scraper_dir'] if set"
+  it "Should associate scrapers with the correct priority"
   it "Should produce no output with the --silent option enabled"
   it "Should show debugging output with --debug option enabled"
   it "Should read shows from config file"
@@ -34,6 +37,7 @@ describe Tget::Main do
   it "Should be able to download torrents with '[' and ']' in the name"
   it "Should save the show and epID when .torrent has been downloaded"
   it "Should not re-download shows that are in options['downloaded_files']"
+  it "Should treat options['download_dir'] as relative path if does not start with '/'"
 
 
 end
