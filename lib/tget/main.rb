@@ -4,12 +4,17 @@ module Tget
     MAX_PRIO=255
     # {100=>{piratebay},
     #  102=>{eztv}}
-    def initialize
-      @@options={}
+    def initialize options={}
+      @@options=options
+      debug File.join(File.expand_path(File.dirname(__FILE__)))
+      if @@options['scraper_dir'].nil?
+        @@options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)))
+      end
+      debug "scraper_dir: #{@@options['scraper_dir']}"
+      
       MAX_PRIO.times {|i|
-        Find.find( File.join(File.expand_path(File.dirname(__FILE__)), "scrapers/#{i}/")) {|s|
+        Find.find( @@options['scraper_dir'] , "scrapers/#{i}/") {|s|
           next unless s[/\.rb$/]
-          #puts "Loading #{s}"
           load s
           SCRAPERS[i]=[] unless SCRAPERS.has_key? i
           SCRAPERS[i] << File.basename(s).capitalize
