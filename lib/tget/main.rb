@@ -10,10 +10,9 @@ module Tget
       if @@options['scraper_dir'].nil?
         @@options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)))
       end
-      debug "scraper_dir: #{@@options['scraper_dir']}"
       
       MAX_PRIO.times {|i|
-        Find.find( @@options['scraper_dir'] , "scrapers/#{i}/") {|s|
+        Find.find( File.join( @@options['scraper_dir'],  "scrapers/#{i}/")) {|s|
           next unless s[/\.rb$/]
           load s
           SCRAPERS[i]=[] unless SCRAPERS.has_key? i
