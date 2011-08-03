@@ -23,6 +23,8 @@ module Tget
     options['download_dir']=File.expand_path("~/Downloads/torrents/")
     options['config_file']=File.expand_path("~/.tget_cfg")
     options['downloaded_files']=File.expand_path("~/.downloaded_files")
+    options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), 'tget/scrapers/')
+    puts options['scraper_dir']
     opts= OptionParser.new do |opts|
       opts.banner= "tget is a command line .torrent downloader"
 
@@ -36,6 +38,10 @@ module Tget
 
       opts.on("--config [PATH]", "Path of config file to use instead of default") do |path|
         options['config_file']= path
+      end
+
+      opts.on("--scrapers [PATH]", "Path to the scrapers") do |path|
+        options['scraper_dir']= path
       end
 
       opts.on("--debug", "Activate debug logging") do |v|
@@ -53,9 +59,9 @@ module Tget
     opts.parse!
 
     begin
-      @@options=options
+      #@@options=options
       Tget::DList.new options['downloaded_files']
-      Tget::Main.new.run( options )
+      Tget::Main.new( options ).run( options )
     ensure
       Tget::DList.save options['downloaded_files']
     end

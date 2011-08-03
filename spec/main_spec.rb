@@ -17,7 +17,10 @@ describe Tget::Main do
   end
 =end
 
-  it "Should load scrapers into prioritized list"
+  it "Should load scrapers into prioritized list" do
+    options= default_opts
+    options['scraper_dir']=''
+  end
   it "Should not load scrapers with prio above MAX_PRIO"
   it "Should exit politely if no config file is found"
   it "Should load scrapers from options['scraper_dir'] if set"

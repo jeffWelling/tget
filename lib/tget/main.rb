@@ -7,13 +7,11 @@ module Tget
     def initialize options={}
       @@options=options
       debug File.join(File.expand_path(File.dirname(__FILE__)))
-      if @@options['scraper_dir'].nil?
-        @@options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)))
-      end
       
       MAX_PRIO.times {|i|
-        Find.find( File.join( @@options['scraper_dir'],  "scrapers/#{i}/")) {|s|
+        Find.find( File.join( @@options['scraper_dir'], "#{i}/" )) {|s|
           next unless s[/\.rb$/]
+          puts "Loading: #{s}"
           load s
           SCRAPERS[i]=[] unless SCRAPERS.has_key? i
           SCRAPERS[i] << File.basename(s).capitalize

@@ -7,4 +7,12 @@ module TgetSpecHelper
       f.puts contents
     end
   end
+  def default_opts
+    options={}
+    options['debug']=false
+    options['download_dir']=File.expand_path("~/Downloads/torrents/")
+    options['config_file']=File.expand_path("~/.tget_cfg")
+    options['downloaded_files']=File.expand_path("~/.downloaded_files")
+    options
+  end
 end
