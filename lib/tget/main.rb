@@ -32,31 +32,8 @@ module Tget
         @@options=options
         debug "Debugging output enabled"
         #load config
-        listing_shows=true
-        shows=[]
-        config={}
         results=[]
-        unless (file= (File.open(options['config_file'], 'r') rescue nil))
-          unless options['silent_mode']
-            puts "Could not open config file: \n#{options['config_file']}\nCheck permissions?\n\nWithout a config file, we have no shows to search for. Exiting..."
-          end
-          exit
-        end
-        while( line=file.gets )
-          if listing_shows==true
-            (listing_shows=false and next) if line[/### Options ###/]
-            shows << line.strip
-            debug "Adding show '#{line.strip}'"
-          else
-            config[line[/^[^=]*/]]=line.gsub(/^[^=]*=/,'').strip
-          end
-        end
-        file.close
-        if options['debug']
-          puts"Config:\n"
-          pp config
-          puts""
-        end
+        config=load_config
 
         #call SCRAPERS
         MAX_PRIO.times {|i|
@@ -67,7 +44,7 @@ module Tget
               debug "Working with #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')}"
 
               extend Tget.const_get(scraper.gsub(/(\.(.){2,3}){1,2}$/,''))
-              shows.each {|show|
+              config[:shows].each {|show|
                 retries=0
                 debug "Searching #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')} for #{show}..."
                 begin
@@ -113,6 +90,33 @@ module Tget
     end
     def debug str
       puts str if @@options['debug']
+    end
+    def load_config
+      config={}
+      listing_shows=true
+      config[:shows]=[]
+      unless (file= (File.open(@@options['config_file'], 'r') rescue nil))
+        unless @@options['silent_mode']
+          puts "Could not open config file: \n#{@@options['config_file']}\nCheck permissions?\n\nWithout a config file, we have no shows to search for. Exiting..."
+        end
+        raise "Config file not found"
+      end
+      while( line=file.gets )
+        if listing_shows==true
+          (listing_shows=false and next) if line[/### Options ###/]
+          config[:shows] << line.strip
+          debug "Adding show '#{line.strip}'"
+        else
+          config[line[/^[^=]*/]]=line.gsub(/^[^=]*=/,'').strip
+        end
+      end
+      file.close
+      if @@options['debug']
+        puts"Config:\n"
+        pp config
+        puts""
+      end
+      config
     end
   end
 end

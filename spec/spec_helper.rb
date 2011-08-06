@@ -14,6 +14,8 @@ module TgetSpecHelper
     options['download_dir']=File.expand_path("~/Downloads/torrents/")
     options['config_file']=File.expand_path("~/.tget_cfg")
     options['downloaded_files']=File.expand_path("~/.downloaded_files")
+    options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), 'tget/scrapers/')
+    options['working_dir']=File.expand_path('.')
     options
   end
   def fake_scraper scraper_suffix=nil

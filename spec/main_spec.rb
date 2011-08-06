@@ -38,8 +38,13 @@ describe Tget::Main do
     Tget::Main.load_scrapers @options
     Tget::Main.SCRAPERS[ (Tget::Main.MAX_PRIO() + 1).to_s ].should == nil
   end
+  it "Should exit politely if no config file is found" do
+    @options['config_file']=''
+    @options['silent_mode']=true
+    tget=Tget::Main.new(@options)
+    lambda {tget.run(@options)}.should raise_error
+  end
 
-  it "Should exit politely if no config file is found"
   it "Should load scrapers from options['scraper_dir'] if set"
   it "Should associate scrapers with the correct priority"
   it "Should produce no output with the --silent option enabled"
