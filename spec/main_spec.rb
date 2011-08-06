@@ -45,8 +45,6 @@ describe Tget::Main do
     lambda {tget.run(@options)}.should raise_error
   end
 
-  it "Should load scrapers from options['scraper_dir'] if set"
-  it "Should associate scrapers with the correct priority"
   it "Should produce no output with the --silent option enabled"
   it "Should show debugging output with --debug option enabled"
   it "Should read shows from config file"
