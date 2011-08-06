@@ -84,7 +84,9 @@ module Tget
           else
             basename= rand(999999999).to_s + ".torrent"
           end
-          File.open( File.join(download_dir, basename), 'wb' ) {|file| file.write open(result.download.gsub("[", "%5B").gsub("]", "%5D")).read }
+          File.open( File.join(download_dir, basename), 'wb' ) {|file| 
+            file.write open(result.download.gsub("[", "%5B").gsub("]", "%5D")).read 
+          } and Tget::Dlist.add( result.show + DLIST_SEP + result.ep_id )
         }
       end
     end
