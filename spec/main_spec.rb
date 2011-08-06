@@ -3,6 +3,9 @@ require File.dirname(__FILE__) + "/spec_helper"
 describe Tget::Main do
   include TgetSpecHelper
 
+  before(:each) do
+    @options= default_opts
+  end
 =begin
   before(:all) do
     @path = setup_new_git_repo
@@ -18,8 +21,14 @@ describe Tget::Main do
 =end
 
   it "Should load scrapers into prioritized list" do
-    options= default_opts
-    options['scraper_dir']=''
+    tmp_dir= File.join( Dir.mktmpdir( 'tget_' ), 'lib', 'tget', 'scrapers' )
+    puts "\n"+tmp_dir+"\n"
+    @options['scraper_dir']= tmp_dir
+    FileUtils.mkdir_p( File.join( tmp_dir, '100') )
+    puts File.join( tmp_dir, '100', 'fakescraper.rb')
+    new_file( File.join(tmp_dir, '100', 'fakescraper.rb'), fake_scraper )
+    Tget::Main.load_scrapers @options
+    Tget::Main.SCRAPERS[100].length.should == 1
   end
   it "Should not load scrapers with prio above MAX_PRIO"
   it "Should exit politely if no config file is found"
@@ -41,6 +50,6 @@ describe Tget::Main do
   it "Should save the show and epID when .torrent has been downloaded"
   it "Should not re-download shows that are in options['downloaded_files']"
   it "Should treat options['download_dir'] as relative path if does not start with '/'"
-
+  it "Should be able to do it's work in options['working_dir'] if specified"
 
 end
