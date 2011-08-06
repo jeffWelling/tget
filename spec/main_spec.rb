@@ -22,15 +22,23 @@ describe Tget::Main do
 
   it "Should load scrapers into prioritized list" do
     tmp_dir= File.join( Dir.mktmpdir( 'tget_' ), 'lib', 'tget', 'scrapers' )
-    puts "\n"+tmp_dir+"\n"
     @options['scraper_dir']= tmp_dir
     FileUtils.mkdir_p( File.join( tmp_dir, '100') )
-    puts File.join( tmp_dir, '100', 'fakescraper.rb')
     new_file( File.join(tmp_dir, '100', 'fakescraper.rb'), fake_scraper )
     Tget::Main.load_scrapers @options
     Tget::Main.SCRAPERS[100].length.should == 1
   end
-  it "Should not load scrapers with prio above MAX_PRIO"
+  it "Should not load scrapers with prio above MAX_PRIO" do
+    tmp_dir= File.join( Dir.mktmpdir( 'tget_' ), 'lib', 'tget', 'scrapers' )
+    @options['scraper_dir']= tmp_dir
+    FileUtils.mkdir_p( File.join( tmp_dir, '100') )
+    FileUtils.mkdir_p( File.join( tmp_dir, (Tget::Main.MAX_PRIO() +1).to_s  ) )
+    new_file( File.join(tmp_dir, '100', 'fakescraper.rb'), fake_scraper )
+    new_file( File.join(tmp_dir, (Tget::Main.MAX_PRIO() +1).to_s , 'fakescraper_.rb'), fake_scraper('_') )
+    Tget::Main.load_scrapers @options
+    Tget::Main.SCRAPERS[ (Tget::Main.MAX_PRIO() + 1).to_s ].should == nil
+  end
+
   it "Should exit politely if no config file is found"
   it "Should load scrapers from options['scraper_dir'] if set"
   it "Should associate scrapers with the correct priority"

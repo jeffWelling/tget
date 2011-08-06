@@ -16,10 +16,10 @@ module TgetSpecHelper
     options['downloaded_files']=File.expand_path("~/.downloaded_files")
     options
   end
-  def fake_scraper
+  def fake_scraper scraper_suffix=nil
     "require 'rss'
     module Tget
-      module Fakescraper
+      module Fakescraper#{scraper_suffix}
         def search str
           []
         end

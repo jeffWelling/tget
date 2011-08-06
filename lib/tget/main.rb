@@ -6,6 +6,9 @@ module Tget
     def self.SCRAPERS
       SCRAPERS
     end
+    def self.MAX_PRIO
+      MAX_PRIO
+    end
 
     def initialize options={}
       @@options=options
@@ -17,7 +20,7 @@ module Tget
       MAX_PRIO.times {|i|
         Find.find( File.join( options['scraper_dir'], "#{i}/" )) {|s|
           next unless s[/\.rb$/]
-          puts "Loading: #{s}"
+          puts "Loading: #{s}" if options['debug']
           load s
           SCRAPERS[i]=[] unless SCRAPERS.has_key? i
           SCRAPERS[i] << File.basename(s).capitalize
