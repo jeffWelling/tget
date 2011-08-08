@@ -48,7 +48,13 @@ describe Tget::Main do
   it "Should produce no output with the --silent option enabled"
   it "Should show debugging output with --debug option enabled"
   it "Should read shows from config file"
-  it "Should read config options from config file if they exist"
+  it "Should read config options from config file if they exist" do
+    @options=default_opts
+
+    config= Tget::Main(@options).load_config
+    config[:shows].length.should == 3
+  end
+
   it "Should 'search' a scraper for a show from the config file"
   it "Should continue searching scrapers sequentially until a match is found"
   it "Should not explode violently if a scraper cannot be reached"
