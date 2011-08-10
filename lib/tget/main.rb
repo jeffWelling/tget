@@ -105,7 +105,11 @@ module Tget
       end
       while( line=file.gets )
         if listing_shows==true
-          (listing_shows=false and next) if line[/### Options ###/]
+          if line[Regexp.new(CONFIG_DELIM)]
+            listing_shows=false
+            next
+            debug "Entering config options section"
+          end
           config[:shows] << line.strip
           debug "Adding show '#{line.strip}'"
         else

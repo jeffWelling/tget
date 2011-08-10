@@ -31,5 +31,10 @@ describe Tget::DList do
     Tget::DList.new ''
     Tget::DList.add "Fubar"+DLIST_SEP+"gonzo"
     Tget::DList.save temp_file
+    File.exist?(temp_file).should == true
+    contents=nil
+    File.open(temp_file, 'r') {|file| contents= file.read }
+    contents.class.should == String
+    contents[/^.*\n/].should == "Fubar"+DLIST_SEP+"gonzo\n"
   end
 end

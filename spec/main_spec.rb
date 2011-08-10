@@ -34,12 +34,25 @@ describe Tget::Main do
 
   it "Should produce no output with the --silent option enabled"
   it "Should show debugging output with --debug option enabled"
-  it "Should read shows from config file"
+  it "Should read shows from config file" do
+    @options=default_opts
+    tmp_file= File.join( Dir.mktmpdir( 'tget_' ), 'tget_test_config.rb')
+    FileUtils.mkdir_p( File.dirname(tmp_file) )
+    new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n" )
+    @options['config_file']= tmp_file
+    config= Tget::Main.new(@options).load_config
+    config[:shows].length.should == 3
+  end
+
   it "Should read config options from config file if they exist" do
     @options=default_opts
-
-    config= Tget::Main(@options).load_config
+    tmp_file= File.join( Dir.mktmpdir( 'tget_' ), 'tget_test_config.rb')
+    FileUtils.mkdir_p( File.dirname(tmp_file) )
+    new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n#{CONFIG_DELIM}\nfubar=1" )
+    @options['config_file']= tmp_file
+    config= Tget::Main.new(@options).load_config
     config[:shows].length.should == 3
+    config['fubar'].should=="1"
   end
 
   it "Should 'search' a scraper for a show from the config file"
