@@ -55,7 +55,23 @@ describe Tget::Main do
     config['fubar'].should=="1"
   end
 
-  it "Should 'search' a scraper for a show from the config file"
+  it "Should 'search' a scraper for a show from the config file" do
+    @options=default_opts
+    @options['config_file']= File.join( Dir.mktmpdir('tget_'), '.tget_cfg' )
+    @options['scraper_dir']= File.join( Dir.mktmpdir('tget_'), 'lib', 'tget', 'scrapers' )
+    FileUtils.mkdir_p( File.join(@options['scraper_dir'], '99' )
+    seach_mthd="
+    def search str
+      TgetSpecHelper::DStore.store str
+      []
+    end"
+    config="Fubar1\nFubar2\nFubar3\n"
+    new_file( @options['config_file'], config )
+    new_file( File.join(@options['config_file'],'99','fakescraper.rb'), fake_scraper(search_mthd) )
+
+
+
+  end
   it "Should continue searching scrapers sequentially until a match is found"
   it "Should not explode violently if a scraper cannot be reached"
   it "Should return matching results from the scraper if they are found, or an empty array"

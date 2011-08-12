@@ -32,4 +32,16 @@ module TgetSpecHelper
       end
     end"
   end
+  #This is used by the spec that checks that the search method of a scrapre actually gets passed
+  # a value from the config file. 
+  # Very Ugly Hack -- FIXME
+  class DStore
+    @@value=[]
+    def self.store value
+      @@value << value
+    end
+    def self.get
+      @@value
+    end
+  end
 end
