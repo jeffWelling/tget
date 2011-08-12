@@ -18,13 +18,17 @@ module TgetSpecHelper
     options['working_dir']=File.expand_path('.')
     options
   end
-  def fake_scraper scraper_suffix=nil
+  def fake_scraper scraper_suffix=nil, search_str=nil
     "require 'rss'
     module Tget
       module Fakescraper#{scraper_suffix}
-        def search str
+        #{if search_str.nil? 
+        "def search str
           []
-        end
+        end"
+          else
+        search_str
+        end}
       end
     end"
   end
