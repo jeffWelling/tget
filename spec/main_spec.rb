@@ -59,18 +59,19 @@ describe Tget::Main do
     @options=default_opts
     @options['config_file']= File.join( Dir.mktmpdir('tget_'), '.tget_cfg' )
     @options['scraper_dir']= File.join( Dir.mktmpdir('tget_'), 'lib', 'tget', 'scrapers' )
-    FileUtils.mkdir_p( File.join(@options['scraper_dir'], '99' )
-    seach_mthd="
+    FileUtils.mkdir_p( File.join(@options['scraper_dir'], '99' ))
+    search_mthd="
     def search str
+      puts \"hello world\"
+      puts str
+      puts \"end of hello world\"
       TgetSpecHelper::DStore.store str
       []
     end"
     config="Fubar1\nFubar2\nFubar3\n"
     new_file( @options['config_file'], config )
-    new_file( File.join(@options['config_file'],'99','fakescraper.rb'), fake_scraper(search_mthd) )
-
-
-
+    new_file( File.join(@options['scraper_dir'], '99', 'fakescraper.rb'), fake_scraper(search_mthd) )
+    TgetSpecHelper::DStore.get[0].should == "Fubar1"
   end
   it "Should continue searching scrapers sequentially until a match is found"
   it "Should not explode violently if a scraper cannot be reached"

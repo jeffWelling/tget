@@ -1,13 +1,13 @@
 module Tget
   class Main
-    SCRAPERS={}
-    MAX_PRIO=255
+    @@scrapers={}
+    @@max_prio=255
     #For debugging
-    def self.SCRAPERS
-      SCRAPERS
+    def self.scrapers
+      @@scrapers
     end
-    def self.MAX_PRIO
-      MAX_PRIO
+    def self.max_prio
+      @@max_prio
     end
 
     def initialize options={}
@@ -17,13 +17,13 @@ module Tget
     end
     def self.load_scrapers options
       puts "Searching for scrapers in: #{options['scraper_dir']}\#{i}" if options['debug']
-      MAX_PRIO.times {|i|
+      @@max_prio.times {|i|
         Find.find( File.join( options['scraper_dir'], "#{i}/" )) {|s|
           next unless s[/\.rb$/]
           puts "Loading: #{s}" if options['debug']
           load s
-          SCRAPERS[i]=[] unless SCRAPERS.has_key? i
-          SCRAPERS[i] << File.basename(s).capitalize
+          @@scrapers[i]=[] unless @@scrapers.has_key? i
+          @@scrapers[i] << File.basename(s).capitalize
         }
       }
     end
@@ -35,12 +35,12 @@ module Tget
         results=[]
         config=load_config
 
-        #call SCRAPERS
-        MAX_PRIO.times {|i|
-          if SCRAPERS.has_key? i
+        #call @@scrapers
+        @@max_prio.times {|i|
+          if @@scrapers.has_key? i
             #This allows multiple scrapers within the same priority
             #but does not guarantee an order for said scrapers.
-            SCRAPERS[i].each {|scraper|
+            @@scrapers[i].each {|scraper|
               debug "Working with #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')}"
 
               extend Tget.const_get(scraper.gsub(/(\.(.){2,3}){1,2}$/,''))
