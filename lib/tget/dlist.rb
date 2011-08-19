@@ -1,7 +1,7 @@
 module Tget
   class DList
     MAX_DF=1024
-    def initialize filename
+    def initialize filename=nil
       @@downloaded_files=[]
       if( file=(File.open(filename, 'r') rescue nil) )
         while( line=file.gets )

@@ -26,6 +26,7 @@ module Tget
     options['downloaded_files']=File.expand_path("~/.downloaded_files")
     options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), 'tget/scrapers/')
     options['working_dir']=File.expand_path('.')
+    options['logger']=$stdout
     opts= OptionParser.new do |opts|
       opts.banner= "tget is a command line .torrent downloader"
 
@@ -66,7 +67,7 @@ module Tget
     begin
       #@@options=options
       Tget::DList.new options['downloaded_files']
-      Tget::Main.new( options ).run( options )
+      Tget::Main.new( options ).run
     ensure
       Tget::DList.save options['downloaded_files']
     end

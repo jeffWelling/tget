@@ -19,5 +19,8 @@ module Tget
     def inspect
       "download_url=>#{@download_url}"
     end
+    def to_s
+      "Result Object:\nShow: #{@show}\nEpID: #{@ep_id}\nDownload URL: #{@download_url}"
+    end
   end
 end
