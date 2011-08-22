@@ -1,11 +1,26 @@
 module Tget
   class Main
     MAX_PRIO=255
-    def initialize options={}
+    def self.default_opts
+      options={}
+      options['debug']=false
+      options['download_dir']=File.expand_path("~/Downloads/torrents/")
+      options['config_file']=File.expand_path("~/.tget_cfg")
+      options['downloaded_files']=File.expand_path("~/.downloaded_files")
+      options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), 'tget/scrapers/')
+      options['working_dir']=File.expand_path('.')
+      options['logger']=$stdout
+      options
+    end
+    def initialize options=Tget::Main.default_opts
       @options=options
       @scrapers={}
       @out= options['logger'] || nil    
+      debug "Debugging output enabled"
+      #config must be loaded after @out is populated to avoid NilClass errors
+      @config=load_config
       load_scrapers options
+      @results=[]
     end
     attr_accessor :scrapers
     def self.max_prio
@@ -24,74 +39,81 @@ module Tget
       }
     end
     def run
-      results=[]
       Dir.chdir( @options['working_dir'] ) do |working_dir|
-        debug "Debugging output enabled"
         #load config
-        config=load_config
 
-        MAX_PRIO.times {|i|
-          if @scrapers.has_key? i
-            #This allows multiple scrapers within the same priority
-            #but does not guarantee an order for said scrapers.
-            @scrapers[i].each {|scraper|
-              debug "Working with #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')}"
-
-              extend Tget.const_get(scraper.gsub(/(\.(.){2,3}){1,2}$/,''))
-              config[:shows].each {|show|
-                retries=0
-                debug "Searching #{scraper.gsub(/(\.(.){2,3}){1,2}$/,'')} for #{show}..."
-                begin
-                  r=search(show)
-                rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
-                  next if retries > MAX_RETRIES
-                  debug "Connection failed, trying again... (Attempt ##{retries+1})"
-                  retries+=1
-                  retry
-                end
-                debug "Found #{r.size rescue 0} results"
-
-                results << r
-              }
-            }
-          end
-        }
-        results=results.flatten.compact
-
-        debug "Results:"
-        if @options['debug']
-          results.each {|result|
-            puts result
-          }
-        end
+        @results=search.flatten.compact
+        p_results
 
         #download file
-        if @options['download_dir'][/\/$/].nil?
-          download_dir=@options['download_dir'] + '/'
-        else
-          download_dir=@options['download_dir']
+        download
+      end
+      @results
+    end
+    def search
+      MAX_PRIO.times {|i|
+        if @scrapers.has_key? i
+          #This allows multiple scrapers within the same priority
+          #but does not guarantee an order for said scrapers.
+          @scrapers[i].each {|scraper|
+            scraper_modname=scraper.gsub(/(\.(.){2,3}){1,2}$/,'')
+            debug "Working with #{scraper_modname}"
+
+            extend Tget.const_get(scraper_modname)
+            @config[:shows].each {|show|
+              retries=0
+              debug "Searching #{scraper_modname} for #{show}..."
+              begin
+                r=search(show)
+              rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
+                next if retries > MAX_RETRIES
+                debug "Connection failed, trying again... (Attempt ##{retries+1})"
+                retries+=1
+                retry
+              end
+              debug "Found #{r.size rescue 0} results"
+
+              @results << r
+            }
+          }
         end
-        FileUtils.mkdir_p(download_dir) unless File.exist?(download_dir)
-        results.each {|result|
-          retries=0
-          if File.basename(result.download).include?('.torrent')
-            basename= File.basename(result.download)
-          else
-            basename= rand(999999999).to_s + ".torrent"
-          end
-          begin
-            File.open( File.join(download_dir, basename), 'wb' ) {|file| 
-              file.write open(result.download.gsub("[", "%5B").gsub("]", "%5D")).read 
-            } and Tget::Dlist.add( result.show + DLIST_SEP + result.ep_id )
-          rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
-            next if retries > MAX_RETRIES
-            debug "Connection failed, trying again... (Attempt ##{retries+1})"
-            retries+=1
-            retry
-          end
+      }
+      @results
+    end
+    def p_results 
+      debug "Results:"
+      if @options['debug']
+        @results.each {|result|
+          puts result
         }
       end
-      results
+    end
+    def download
+      return 0 if @results.empty?
+      if @options['download_dir'][/\/$/].nil?
+        download_dir=@options['download_dir'] + '/'
+      else
+        download_dir=@options['download_dir']
+      end
+      FileUtils.mkdir_p(download_dir) unless File.exist?(download_dir)
+      @results.each {|result|
+        retries=0
+        if File.basename(result.download).include?('.torrent')
+          basename= File.basename(result.download)
+        else
+          basename= rand(999999999).to_s + ".torrent"
+        end
+        begin
+          File.open( File.join(download_dir, basename), 'wb' ) {|file| 
+            file.write open(result.download).read 
+          } and Tget::DList.add( result.show + DLIST_SEP + result.ep_id )
+        rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
+          next if retries > MAX_RETRIES
+          debug "Connection failed, trying again... (Attempt ##{retries+1})"
+          retries+=1
+          retry
+        end
+      }
     end
     def debug str
       puts str if @options['debug']
@@ -122,15 +144,15 @@ module Tget
       file.close
       if @options['debug']
         puts"Config:  \n"
-        config.each_key {|key|
+        config.sort {|x,y| x[0].to_s <=> y[0].to_s}.each {|key,value|
           if key==:shows
             puts "   Shows: --|"
-            config[:shows].each {|show|
+            value.each {|show|
               puts "            #{show}"
             }
           else
             puts "   "+key
-            puts "       "+config[key]
+            puts "       "+value
           end
         }
       end

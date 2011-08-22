@@ -3,7 +3,10 @@ describe Tget::DList do
   include TgetSpecHelper
 
   before(:each) do
-    @options= default_opts
+    @options= Tget::Main.default_opts
+  end
+  after(:all) do
+    FileUtils.rm_rf( Dir.glob(File.join( File.dirname( Dir.mktmpdir ),'tget_*')) )
   end
   
   it "Should initialize to contents of file" do

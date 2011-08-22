@@ -23,17 +23,6 @@ module TgetSpecHelper
       f.puts contents
     end
   end
-  def default_opts
-    options={}
-    options['debug']=false
-    options['download_dir']=File.expand_path("~/Downloads/torrents/")
-    options['config_file']=File.expand_path("~/.tget_cfg")
-    options['downloaded_files']=File.expand_path("~/.downloaded_files")
-    options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), 'tget/scrapers/')
-    options['working_dir']=File.expand_path('.')
-    options['logger']=$stdout
-    options
-  end
   def fake_scraper scraper_suffix=nil, search_str=nil
     "require 'rss'
     module Tget

@@ -3,7 +3,15 @@ module Tget
   #A Result object is created per result returned from the scrapers
   class Result
     def initialize(url, show, ep_id)
-      @download_url=url
+      if !url[/^http:\/\//].nil?
+        #broken down for debugging
+        pre=url.gsub(/[^\/]+$/,'')
+        x=url.gsub('http://','')[/[^\/]+$/]
+        post=URI.encode( x )
+        @download_url= pre+post
+      else
+        @download_url= url
+      end
       @show= show
       @ep_id= ep_id
     end
@@ -17,7 +25,7 @@ module Tget
       @download_url
     end
     def inspect
-      "download_url=>#{@download_url}"
+      to_s
     end
     def to_s
       "Result Object:\nShow: #{@show}\nEpID: #{@ep_id}\nDownload URL: #{@download_url}"
