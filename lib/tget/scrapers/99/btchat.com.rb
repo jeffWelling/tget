@@ -1,7 +1,7 @@
 require 'rss'
 module Tget
-  module Ezrss
-    @@rss_feed="http://ezrss.it/feed/"
+  module Btchat
+    @@rss_feed="http://rss.bt-chat.com/?cat=9"
     def search(str)
       rss_content=''
       results=[]
@@ -14,7 +14,7 @@ module Tget
         ep_id=EpisodeID.new(torrent.title, str)
         if torrent.title[regex]
           debug "Matched #{str} to #{torrent.title}"
-          (debug "Skipped because we has it" and next) if Tget::DList.has?(str, ep_id)
+          (debug "Skipped because we has it" and next) if Tget::DList.has?(str, ep_id.to_s)
           results << Tget::Result.new( torrent.link, str,  ep_id )
         else
           debug "Could not not match #{str} to #{torrent.title}"

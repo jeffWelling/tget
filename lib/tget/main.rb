@@ -7,9 +7,10 @@ module Tget
       options['download_dir']=File.expand_path("~/Downloads/torrents/")
       options['config_file']=File.expand_path("~/.tget_cfg")
       options['downloaded_files']=File.expand_path("~/.downloaded_files")
-      options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), 'tget/scrapers/')
+      options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), '/scrapers/')
       options['working_dir']=File.expand_path('.')
       options['logger']=$stdout
+      options['timeout']=5
       options
     end
     def initialize options=Tget::Main.default_opts
@@ -56,24 +57,26 @@ module Tget
           #This allows multiple scrapers within the same priority
           #but does not guarantee an order for said scrapers.
           @scrapers[i].each {|scraper|
-            scraper_modname=scraper.gsub(/(\.(.){2,3}){1,2}$/,'')
-            debug "Working with #{scraper_modname}"
+            do_until(@options['timeout'], scraper) {
+              scraper_modname=scraper.gsub(/(\.(.){2,3}){1,2}$/,'')
+              debug "Working with #{scraper_modname}"
 
-            extend Tget.const_get(scraper_modname)
-            @config[:shows].each {|show|
-              retries=0
-              debug "Searching #{scraper_modname} for #{show}..."
-              begin
-                r=search(show)
-              rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
-                next if retries > MAX_RETRIES
-                debug "Connection failed, trying again... (Attempt ##{retries+1})"
-                retries+=1
-                retry
-              end
-              debug "Found #{r.size rescue 0} results"
+              extend Tget.const_get(scraper_modname)
+              @config[:shows].each {|show|
+                retries=0
+                debug "Searching #{scraper_modname} for #{show}..."
+                begin
+                  r=search(show)
+                rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
+                  next if retries > MAX_RETRIES
+                  debug "Connection failed, trying again... (Attempt ##{retries+1})"
+                  retries+=1
+                  retry
+                end
+                debug "Found #{r.size rescue 0} results"
 
-              @results << r
+                @results << r
+              }
             }
           }
         end
@@ -106,7 +109,7 @@ module Tget
         begin
           File.open( File.join(download_dir, basename), 'wb' ) {|file| 
             file.write open(result.download).read 
-          } and Tget::DList.add( result.show + DLIST_SEP + result.ep_id )
+          } and Tget::DList.add( result.show + DLIST_SEP + result.ep_id.to_s )
         rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
           next if retries > MAX_RETRIES
           debug "Connection failed, trying again... (Attempt ##{retries+1})"
@@ -160,6 +163,14 @@ module Tget
     end
     def puts(*strings)
       @out.puts(*strings) 
+    end
+    private
+    def do_until(i, prefix)
+      begin
+        Timeout::timeout(i) { yield() }
+      rescue Timeout::Error => e
+        debug prefix+": Timed Out"
+      end
     end
   end
 end

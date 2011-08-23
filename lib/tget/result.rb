@@ -3,14 +3,16 @@ module Tget
   #A Result object is created per result returned from the scrapers
   class Result
     def is_ep_id? ep_id
-      return true if ep_id[/s(\d){1,2}e(\d){1,2}/i] or
-        ep_id[/(\d){1,2}x(\d){1,2}/i]
+      return true if ep_id.class== Tget::EpisodeID
       false
     end
     def initialize(url, show, ep_id)
       raise ArgumentError unless (!url.nil? and !show.nil? and !ep_id.nil?)
+      if ep_id.class==String
+        ep_id=Tget::EpisodeID.new(ep_id)
+      end
       unless is_ep_id? ep_id
-        raise ArgumentError
+        raise ArgumentError.new("Not ep_id: #{ep_id}")
       end
       if !url[/^http:\/\//].nil?
         #broken down for debugging

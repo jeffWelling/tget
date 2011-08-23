@@ -71,7 +71,31 @@ Config:
             Fubar1
             Fubar2
             Fubar3
-Searching for scrapers in: /Users/jeff/Documents/Projects/tget/lib/tget/tget/scrapers/\#{i}
+Searching for scrapers in: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/\#{i}
+Loading: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/99/btchat.com.rb
+Loading: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/100/ezrss.it.rb
+Loading: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/101/thepiratebay.org.rb
+Working with Btchat
+Searching Btchat for Fubar1...
+Connection failed, trying again... (Attempt #1)
+Searching Btchat for Fubar2...
+Connection failed, trying again... (Attempt #1)
+Searching Btchat for Fubar3...
+Connection failed, trying again... (Attempt #1)
+Working with Ezrss
+Searching Ezrss for Fubar1...
+Connection failed, trying again... (Attempt #1)
+Searching Ezrss for Fubar2...
+Connection failed, trying again... (Attempt #1)
+Searching Ezrss for Fubar3...
+Connection failed, trying again... (Attempt #1)
+Working with Thepiratebay
+Searching Thepiratebay for Fubar1...
+Found 0 results
+Searching Thepiratebay for Fubar2...
+Found 0 results
+Searching Thepiratebay for Fubar3...
+Found 0 results
 Results:
     EOF
     expected_output.map {|exp_line| [exp_line,TGET_HISTORY.gets] }.each {|i|

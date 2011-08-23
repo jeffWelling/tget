@@ -9,6 +9,7 @@ require 'fileutils'
 require 'pp'
 require 'find'
 require 'open-uri'
+require 'timeout'
 require 'tget/main'
 require 'tget/result'
 require 'tget/dlist'
@@ -19,14 +20,7 @@ CONFIG_DELIM="### Options ###"
 module Tget
   autoload :VERSION, 'tget/version'
   def self.start
-    options={}
-    options['debug']=false
-    options['download_dir']=File.expand_path("~/Downloads/torrents/")
-    options['config_file']=File.expand_path("~/.tget_cfg")
-    options['downloaded_files']=File.expand_path("~/.downloaded_files")
-    options['scraper_dir']=File.join(File.expand_path(File.dirname(__FILE__)), 'tget/scrapers/')
-    options['working_dir']=File.expand_path('.')
-    options['logger']=$stdout
+    options=Tget::Main.default_opts
     opts= OptionParser.new do |opts|
       opts.banner= "tget is a command line .torrent downloader"
 
@@ -60,6 +54,10 @@ module Tget
 
       opts.on("--silent", "Silence all output") do |v|
         options['silent_mode']=true
+      end
+
+      opts.on("--timeout", "Number of seconds to wait for execution of a scraper to complete") do |v|
+        options['timeout']=v
       end
     end
     opts.parse!

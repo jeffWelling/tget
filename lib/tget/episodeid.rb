@@ -39,13 +39,18 @@ module Tget
 
       elsif raw_ep_id[FORMAT1]
         @episode_id= "s#{raw_ep_id[FORMAT1].strip[/^(\d){1,2}/]}e#{raw_ep_id[FORMAT1].strip[/(\d){1,3}$/]}"
-      else
+      elsif  (named?(raw_ep_id) rescue false)
         #Could get here for something like
         #"National Geographic The Perils Of Religion", which is a valid episode 
         #but has no valid episode ID or air date.
-        raise ShowReqd.new('Could not access @show') if @show.nil?
         @episode_name= raw_ep_id.gsub(@show,'').gsub(/\[[^\[]+\].*$/,'').gsub(/^\s?-?\s?/,'').gsub(/\s?-?\s?$/,'')
+      else
+        raise ArgumentError.new("EpisodeID could not determind id from: #{raw_ep_id}")
       end
+    end
+    def named? str
+      raise ShowReqd.new('Could not access @show') if @show.nil?
+      !str.gsub(@show,'').gsub(/\[[^\[]+\].*$/,'').gsub(/^\s?-?\s?/,'').gsub(/\s?-?\s?$/,'').nil? rescue false
     end
   end
 end
