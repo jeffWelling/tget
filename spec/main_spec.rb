@@ -304,7 +304,5 @@ Results:
       File.basename(dir)[/fake_torrent_\[other\.stuff\]\.txt1\.torrent/].nil?.should == true
     }
   end
-  it "Should treat options['download_dir'] as relative path if does not start with '/'"
-  it "Should be able to do it's work in options['working_dir'] if specified"
 
 end
