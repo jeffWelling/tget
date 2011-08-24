@@ -28,4 +28,7 @@ describe Tget::EpisodeID do
     epid.id.should == nil
     epid.name.should == 'Religion Is A Sham'
   end
+  it "Should not explode when the airdate uses periods" do
+    lambda {Tget::EpisodeID.new('David.Letterman.2011.08.22.Denis.Leary.HDTV.XviD-2HD.torrent', 'Fubar')}.should_not raise_error
+  end
 end

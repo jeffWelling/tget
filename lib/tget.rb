@@ -20,6 +20,16 @@ CONFIG_DELIM="### Options ###"
 module Tget
   autoload :VERSION, 'tget/version'
   def self.start
+    options=parse_opts
+    begin
+      #@@options=options
+      Tget::DList.new options['downloaded_files']
+      single_instance { Tget::Main.new( options ).run }
+    ensure
+      Tget::DList.save options['downloaded_files']
+    end
+  end
+  def self.parse_opts
     options=Tget::Main.default_opts
     opts= OptionParser.new do |opts|
       opts.banner= "tget is a command line .torrent downloader"
@@ -61,13 +71,13 @@ module Tget
       end
     end
     opts.parse!
-
-    begin
-      #@@options=options
-      Tget::DList.new options['downloaded_files']
-      Tget::Main.new( options ).run
-    ensure
-      Tget::DList.save options['downloaded_files']
+    options
+  end
+  def self.single_instance(&block)
+    if File.open($0).flock(File::LOCK_EX|File::LOCK_NB)
+      block.call
+    else
+      warn "Tget is already running"
     end
   end
 end

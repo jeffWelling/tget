@@ -6,6 +6,10 @@ describe Tget::Main do
   before(:each) do
     @options= Tget::Main.default_opts
     @options['download_dir']=Dir.mktmpdir('tget_downloaddir_')
+    tmp_dir= File.join( Dir.mktmpdir( 'tget_' ), 'lib', 'tget', 'scrapers' )
+    @options['scraper_dir']= tmp_dir
+    FileUtils.mkdir_p( File.join( tmp_dir, '100') )
+    new_file( File.join(tmp_dir, '100', 'fakescraper.rb'), fake_scraper )
   end
 
   after(:all) do
@@ -57,7 +61,7 @@ describe Tget::Main do
     @options['config_file']= tmp_file
     FileUtils.mkdir_p( File.dirname(tmp_file) )
     new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n#{CONFIG_DELIM}\nfubar=1" )
-    tget=Tget::Main.new(@options).run
+    Tget::Main.new(@options).run
     TGET_HISTORY.rewind
     expected_output= <<-EOF
 Debugging output enabled
@@ -71,35 +75,25 @@ Config:
             Fubar1
             Fubar2
             Fubar3
-Searching for scrapers in: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/\#{i}
-Loading: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/99/btchat.com.rb
-Loading: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/100/ezrss.it.rb
-Loading: /Users/jeff/Documents/Projects/tget/lib/tget/scrapers/101/thepiratebay.org.rb
-Working with Btchat
-Searching Btchat for Fubar1...
-Connection failed, trying again... (Attempt #1)
-Searching Btchat for Fubar2...
-Connection failed, trying again... (Attempt #1)
-Searching Btchat for Fubar3...
-Connection failed, trying again... (Attempt #1)
-Working with Ezrss
-Searching Ezrss for Fubar1...
-Connection failed, trying again... (Attempt #1)
-Searching Ezrss for Fubar2...
-Connection failed, trying again... (Attempt #1)
-Searching Ezrss for Fubar3...
-Connection failed, trying again... (Attempt #1)
-Working with Thepiratebay
-Searching Thepiratebay for Fubar1...
+Searching for scrapers in: /var/folders/L1/L11sylN5HUqmCl-KbSIKJ++++TI/-Tmp-/tget_20110824-50968-xlwhvk/lib/tget/scrapers\#{i}
+Loading: /var/folders/L1/L11sylN5HUqmCl-KbSIKJ++++TI/-Tmp-/tget_20110824-50968-xlwhvk/lib/tget/scrapers/100/fakescraper.rb
+Working with Fakescraper
+Searching Fakescraper for Fubar1...
 Found 0 results
-Searching Thepiratebay for Fubar2...
+Searching Fakescraper for Fubar2...
 Found 0 results
-Searching Thepiratebay for Fubar3...
+Searching Fakescraper for Fubar3...
 Found 0 results
 Results:
     EOF
     expected_output.map {|exp_line| [exp_line,TGET_HISTORY.gets] }.each {|i|
-      i[0].should == i[1]
+      if i[1][/^Searching for scrapers/i]        
+        i[0][/^Searching for scrapers/i].nil?.should_not == true
+      elsif i[1][/^Loading: /i]
+        i[0][/^Loading: /i].nil?.should_not == true
+      else
+        i[1].should == i[0]
+      end
     }
     TGET_HISTORY.gets.should == nil
   end

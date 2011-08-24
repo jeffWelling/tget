@@ -165,6 +165,9 @@ module Tget
       @out.puts(*strings) 
     end
     private
+    def prep_title
+      prep_title.gsub(/$/,'')
+    end
     def do_until(i, prefix)
       begin
         Timeout::timeout(i) { yield() }

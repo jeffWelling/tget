@@ -32,7 +32,7 @@ module Tget
     end
     def set_epid raw_ep_id
       if raw_ep_id[AIRDATE_REGEX]
-        @episode_id= "#{raw_ep_id[AIRDATE_REGEX][/^(\d){4}/]}-#{raw_ep_id[AIRDATE_REGEX][/-(\d){1,2}-/].gsub('-','')}-#{raw_ep_id[AIRDATE_REGEX][/(\d){1,3}$/]}"
+        @episode_id= "#{raw_ep_id[AIRDATE_REGEX][/^(\d){4}/]}-#{raw_ep_id[AIRDATE_REGEX][/[ \.-](\d){1,2}[ \.-]/].gsub(/[ \.-]/,'')}-#{raw_ep_id[AIRDATE_REGEX][/(\d){1,3}$/]}"
 
       elsif raw_ep_id[FORMAT0]
         @episode_id=raw_ep_id[FORMAT0].gsub(/s/i,'s').gsub(/e/i,'e')
