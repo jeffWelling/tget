@@ -102,14 +102,16 @@ module Tget
       @results.each {|result|
         retries=0
         if File.basename(result.download).include?('.torrent')
-          basename= File.basename(result.download)
+          basename= URI.decode(File.basename(result.download))
         else
           basename= rand(999999999).to_s + ".torrent"
         end
         begin
           File.open( File.join(download_dir, basename), 'wb' ) {|file| 
-            file.write open(result.download).read 
-          } and Tget::DList.add( result.show + DLIST_SEP + result.ep_id.to_s )
+            file.write open(result.download).read
+            debug "Downloaded--|\n     From: #{URI.decode(result.download)}\n     To:   #{File.join(download_dir,basename)}"
+          }
+          Tget::DList.add( result.show + DLIST_SEP + result.ep_id.to_s )
         rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
           next if retries > MAX_RETRIES
           debug "Connection failed, trying again... (Attempt ##{retries+1})"

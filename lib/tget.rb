@@ -9,6 +9,8 @@ require 'fileutils'
 require 'pp'
 require 'find'
 require 'open-uri'
+require 'rubygems'
+require 'nokogiri'
 require 'timeout'
 require 'tget/main'
 require 'tget/result'
@@ -23,7 +25,7 @@ module Tget
     options=parse_opts
     begin
       #@@options=options
-      Tget::DList.new options['downloaded_files']
+      Tget::DList.load options['downloaded_files']
       single_instance { Tget::Main.new( options ).run }
     ensure
       Tget::DList.save options['downloaded_files']
@@ -66,8 +68,8 @@ module Tget
         options['silent_mode']=true
       end
 
-      opts.on("--timeout", "Number of seconds to wait for execution of a scraper to complete") do |v|
-        options['timeout']=v
+      opts.on("--timeout SECONDS", "Number of seconds to wait for execution of a scraper to complete") do |v|
+        options['timeout']=v.to_i
       end
     end
     opts.parse!

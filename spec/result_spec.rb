@@ -25,5 +25,13 @@ describe Tget::Result do
   it "Should convert to string cleanly" do
     lambda {Tget::Result.new('http://localhost/fubar.torrent', 'I am a show', Tget::EpisodeID.new('s01e01')).to_s}.should_not raise_error
   end
-
+  it "Should be able to hold >+1 alternate urls" do
+    pre='http://localhost/'
+    main_url=pre+'fubar1'
+    alt_urls=[pre+'fubar2',pre+'fubar3',pre+'fubar4']
+    result=Tget::Result.new(main_url, 'Some show', 's01e01')
+    result.add_alt_urls alt_urls
+    result.url.should == pre+'fubar1'
+    result.alt_urls.should == [pre+'fubar2',pre+'fubar3',pre+'fubar4']
+  end
 end

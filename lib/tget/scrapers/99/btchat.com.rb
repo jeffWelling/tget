@@ -11,10 +11,14 @@ module Tget
       rss= RSS::Parser.parse(rss_content, false)
       rss.items.each {|torrent|
         regex= Regexp.new( str.gsub(/[ \.-]/,'[ \.-]') )
-        ep_id=EpisodeID.new(torrent.title, str)
         if torrent.title[regex]
+          ep_id=EpisodeID.new(torrent.title, str)
           debug "Matched #{str} to #{torrent.title}"
-          (debug "Skipped because we has it" and next) if Tget::DList.has?(str, ep_id.to_s)
+          debug "epid is #{ep_id.to_s}"
+          if Tget::DList.has?(str, ep_id.to_s)
+            debug "Skipped because we has it"
+            next
+          end
           results << Tget::Result.new( torrent.link, str,  ep_id )
         else
           debug "Could not not match #{str} to #{torrent.title}"
