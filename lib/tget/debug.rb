@@ -7,6 +7,8 @@ module Debug
     (puts str if @@options['debug']) #rescue $stdout.puts(str)
   end
   def puts(*strings)
-    @@out.puts(*strings) #rescue $stdout.puts(*strings)
+    unless @@options['silent_mode']
+      @@out.puts(*strings) #rescue $stdout.puts(*strings)
+    end
   end
 end
