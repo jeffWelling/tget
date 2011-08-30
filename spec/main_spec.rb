@@ -6,6 +6,7 @@ describe Tget::Main do
   before(:each) do
     @options= Tget::Main.default_opts
     @options['download_dir']=Dir.mktmpdir('tget_downloaddir_')
+    @options['silent_mode']=true
     tmp_dir= File.join( Dir.mktmpdir( 'tget_' ), 'lib', 'tget', 'scrapers' )
     @options['scraper_dir']= tmp_dir
     FileUtils.mkdir_p( File.join( tmp_dir, '100') )
@@ -59,6 +60,7 @@ describe Tget::Main do
     @options['logger']=TGET_HISTORY
     #@options['logger']=$stdout
     @options['debug']=true
+    @options['silent_mode']=false
     tmp_file= File.join( Dir.mktmpdir( 'tget_' ), 'tget_test_config.rb')
     @options['config_file']= tmp_file
     FileUtils.mkdir_p( File.dirname(tmp_file) )
@@ -78,8 +80,10 @@ Config:
             Fubar1
             Fubar2
             Fubar3
-Searching for scrapers in: /var/folders/L1/L11sylN5HUqmCl-KbSIKJ++++TI/-Tmp-/tget_20110824-50968-xlwhvk/lib/tget/scrapers\#{i}
-Loading: /var/folders/L1/L11sylN5HUqmCl-KbSIKJ++++TI/-Tmp-/tget_20110824-50968-xlwhvk/lib/tget/scrapers/100/fakescraper.rb
+Searching for scrapers in: /tmp/tget_20110829-3147-13ioymf/lib/tget/scrapers\#{i}
+Loading: /tmp/tget_20110829-3147-13ioymf/lib/tget/scrapers/100/fakescraper.rb
+Loaded.
+Searching for 3 shows ...
 Working with Fakescraper
 Searching Fakescraper for Fubar1...
 Found 0 results
@@ -88,6 +92,10 @@ Found 0 results
 Searching Fakescraper for Fubar3...
 Found 0 results
 Results:
+No Results.
+Done.
+Downloading 0 .torrent files...
+Done.
     EOF
     expected_output.map {|exp_line| [exp_line,TGET_HISTORY.gets] }.each {|i|
       if (i[1][/^Searching for scrapers/i] rescue false) 

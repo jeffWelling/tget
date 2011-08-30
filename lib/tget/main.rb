@@ -133,7 +133,7 @@ module Tget
         unless @options['silent_mode']
           puts "Could not open config file: \n#{@options['config_file']}\nCheck permissions?\n\nWithout a config file, we have no shows to search for. Exiting..."
         end
-        raise "Config file not found"
+        exit
       end
       while( line=file.gets )
         if listing_shows==true
