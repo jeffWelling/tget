@@ -4,6 +4,8 @@ describe Tget::DList do
 
   before(:each) do
     @options= Tget::Main.default_opts
+    extend Debug
+    these_be_options @options
   end
   after(:all) do
     FileUtils.rm_rf( Dir.glob(File.join( File.dirname( Dir.mktmpdir ),'tget_*')) )

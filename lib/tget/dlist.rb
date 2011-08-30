@@ -3,6 +3,7 @@ module Tget
     @@max_df=1024
     @@downloaded_files=[]
     class << self
+      include Debug
       attr_reader :max_df
     end
     def self.load filename
@@ -16,7 +17,7 @@ module Tget
       @@downloaded_files= @@downloaded_files.uniq.compact
     end
     def self.add event
-      puts "DList.add()-ing #{event}"
+      debug "DList.add()-ing #{event}"
       unless event.class==String
         raise ArgumentError, "Event is not a string"
       end
@@ -31,14 +32,14 @@ module Tget
       @@downloaded_files || Tget::DList.load
       @@downloaded_files.each {|event|
         if (event[Regexp.new(title, 'i')] and event[Regexp.new(id, 'i')])
-          puts "DList.has? has #{title}, #{id}, in #{event}"
+          debug "DList.has? has #{title}, #{id}, in #{event}"
           return true
         elsif (event[Regexp.new(title,'i')] and id.nil?)
-          puts "DList.has? has #{title}, :empty, in #{event}"
+          debug "DList.has? has #{title}, :empty, in #{event}"
           return true
         end
       }
-      puts "DList.has? does not hass #{title}, #{id}"
+      debug "DList.has? does not hass #{title}, #{id}"
       return false
     end
     def self.save file

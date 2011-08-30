@@ -12,6 +12,7 @@ require 'open-uri'
 require 'rubygems'
 require 'nokogiri'
 require 'timeout'
+require 'tget/debug'
 require 'tget/main'
 require 'tget/result'
 require 'tget/dlist'
@@ -25,6 +26,8 @@ module Tget
     options=parse_opts
     begin
       #@@options=options
+      extend Debug
+      these_be_options options
       Tget::DList.load options['downloaded_files']
       single_instance { Tget::Main.new( options ).run }
     ensure

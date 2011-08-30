@@ -10,6 +10,8 @@ describe Tget::Main do
     @options['scraper_dir']= tmp_dir
     FileUtils.mkdir_p( File.join( tmp_dir, '100') )
     new_file( File.join(tmp_dir, '100', 'fakescraper.rb'), fake_scraper )
+    extend Debug
+    these_be_options @options
   end
 
   after(:all) do
@@ -61,6 +63,7 @@ describe Tget::Main do
     @options['config_file']= tmp_file
     FileUtils.mkdir_p( File.dirname(tmp_file) )
     new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n#{CONFIG_DELIM}\nfubar=1" )
+    these_be_options @options
     Tget::Main.new(@options).run
     TGET_HISTORY.rewind
     expected_output= <<-EOF
@@ -87,9 +90,9 @@ Found 0 results
 Results:
     EOF
     expected_output.map {|exp_line| [exp_line,TGET_HISTORY.gets] }.each {|i|
-      if i[1][/^Searching for scrapers/i]        
+      if (i[1][/^Searching for scrapers/i] rescue false) 
         i[0][/^Searching for scrapers/i].nil?.should_not == true
-      elsif i[1][/^Loading: /i]
+      elsif (i[1][/^Loading: /i] rescue false)
         i[0][/^Loading: /i].nil?.should_not == true
       else
         i[1].should == i[0]

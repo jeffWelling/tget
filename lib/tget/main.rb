@@ -1,5 +1,6 @@
 module Tget
   class Main
+    include Debug
     MAX_PRIO=255
     def self.default_opts
       options={}
@@ -22,17 +23,18 @@ module Tget
       @config=load_config
       load_scrapers options
       @results=[]
+      puts "Loaded."
     end
     attr_accessor :scrapers
     def self.max_prio
       MAX_PRIO
     end
     def load_scrapers options
-      puts "Searching for scrapers in: #{options['scraper_dir']}\#{i}" if options['debug']
+      debug "Searching for scrapers in: #{options['scraper_dir']}\#{i}"
       MAX_PRIO.times {|i|
         Find.find( File.join( options['scraper_dir'], "#{i}/" )) {|s|
           next unless s[/\.rb$/]
-          puts "Loading: #{s}" if options['debug']
+          debug "Loading: #{s}"
           load s
           @scrapers[i]=[] unless @scrapers.has_key? i
           @scrapers[i] << File.basename(s).capitalize
@@ -41,17 +43,15 @@ module Tget
     end
     def run
       Dir.chdir( @options['working_dir'] ) do |working_dir|
-        #load config
-
         @results=search.flatten.compact
         p_results
-
-        #download file
         download
       end
+      puts "Done."
       @results
     end
     def search
+      puts "Searching for #{@config[:shows].length} shows ..."
       MAX_PRIO.times {|i|
         if @scrapers.has_key? i
           #This allows multiple scrapers within the same priority
@@ -86,12 +86,17 @@ module Tget
     def p_results 
       debug "Results:"
       if @options['debug']
-        @results.each {|result|
-          puts result
-        }
+        if @results.length > 0
+          @results.each {|result|
+            debug result
+          }
+        else
+          debug "No Results.\nDone."
+        end
       end
     end
     def download
+      puts "Downloading #{@results.length} .torrent files..."
       return 0 if @results.empty?
       if @options['download_dir'][/\/$/].nil?
         download_dir=@options['download_dir'] + '/'
@@ -119,9 +124,6 @@ module Tget
           retry
         end
       }
-    end
-    def debug str
-      puts str if @options['debug']
     end
     def load_config
       config={}
@@ -162,9 +164,6 @@ module Tget
         }
       end
       config
-    end
-    def puts(*strings)
-      @out.puts(*strings) 
     end
     private
     def prep_title

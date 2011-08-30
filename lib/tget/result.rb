@@ -2,6 +2,7 @@ module Tget
   #This class is to help turn abitrary data intto a dataset we can use
   #A Result object is created per result returned from the scrapers
   class Result
+    include Debug
     def is_ep_id? ep_id
       return true if ep_id.class== Tget::EpisodeID
       false

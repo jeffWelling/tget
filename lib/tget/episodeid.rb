@@ -11,6 +11,7 @@ module Tget
   class EpisodeID
     class ShowReqd < ArgumentError
     end
+    include Debug
     #the show argument is required in order to properly
     #match, for example, National Geographic episode names
     def initialize raw_ep_id, show=nil
