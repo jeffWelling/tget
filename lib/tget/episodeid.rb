@@ -25,8 +25,7 @@ module Tget
   #This object should be able to take any episode format and
   #standardize ones that are foreign or unsightly.
   class EpisodeID
-    class ShowReqd < ArgumentError
-    end
+    class ShowReqd < ArgumentError; end
     include Debug
     #the show argument is required in order to properly
     #match, for example, National Geographic episode names

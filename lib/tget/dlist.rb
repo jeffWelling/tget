@@ -47,7 +47,7 @@ module Tget
       raise ArgumentError.new("DList.has?(title,id): id cannot be nil") if id.nil?
       @@downloaded_files || Tget::DList.load
       @@downloaded_files.each {|event|
-        if (event[Regexp.new(title, 'i')] and event[Regexp.new(id, 'i')])
+        if (event[Regexp.new(Regexp.escape(title), 'i')] and event[Regexp.new(Regexp.escape(id), 'i')])
           debug "DList.has? has #{title}, #{id}, in #{event}"
           return true
         elsif (event[Regexp.new(title,'i')] and id.nil?)

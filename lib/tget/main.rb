@@ -28,6 +28,7 @@ module Tget
       options['working_dir']=File.expand_path('.')
       options['logger']=$stdout
       options['timeout']=5
+      options['min_seeds']=50
       options
     end
     def initialize options=Tget::Main.default_opts
@@ -158,6 +159,7 @@ module Tget
             next
             debug "Entering config options section"
           end
+          next if line.strip.empty?
           config[:shows] << line.strip
           debug "Adding show '#{line.strip}'"
         else

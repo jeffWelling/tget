@@ -71,6 +71,10 @@ module Tget
         options['scraper_dir']= path
       end
 
+      opts.on("--min-seeds [NUMBER]", "Minimum number of seeds") do |seeds|
+        options['min_seeds']=seeds
+      end
+
       opts.on("--working-dir [PATH]", "Alternate working directory") do |path|
         options['working_dir']= path
       end
