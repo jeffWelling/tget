@@ -60,11 +60,11 @@ module Tget
         unless pre_results[key].empty?
           debug "For each of result identified by '#{key}'..."
           pre_results[key].each {|r|
-            debug r[1].seeds
+            debug r[1].seeds+" seeds"
           }
-          debug "We will use #{pre_results[key].sort.reverse[0][1].seeds}"
+          debug "We will use the one with #{pre_results[key].sort.reverse[0][1].seeds} seeds"
           if Tget::DList.has?(str,pre_results[key].sort.reverse[0][1].ep_id.to_s)
-            debug "Skipped because we has it"
+            debug "Skipped because we have it"
             next
           end
           results<<pre_results[key].sort[0][1]

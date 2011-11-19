@@ -22,11 +22,13 @@ describe Tget::Main do
   before(:each) do
     @options= Tget::Main.default_opts
     @options['download_dir']=Dir.mktmpdir('tget_downloaddir_')
+    @options['downloaded_files']=File.join( Dir.mktmpdir('tget_dlfiles'), 'downloaded_files.txt' )
     @options['silent_mode']=true
     tmp_dir= File.join( Dir.mktmpdir( 'tget_' ), 'lib', 'tget', 'scrapers' )
     @options['scraper_dir']= tmp_dir
-    FileUtils.mkdir_p( File.join( tmp_dir, '100') )
-    new_file( File.join(tmp_dir, '100', 'fakescraper.rb'), fake_scraper )
+    FileUtils.mkdir_p File.join( tmp_dir, '100')
+    new_file File.join(tmp_dir, '100', 'fakescraper.rb'), fake_scraper
+    FileUtils.touch @options['downloaded_files']
     extend Debug
     these_be_options @options
   end
@@ -64,12 +66,47 @@ describe Tget::Main do
 
   it "Should produce no output with the --silent option enabled" do
     @options['logger']=TGET_HISTORY
-    @options['silent']=true
+    @options['silent_mode']=true
     tmp_file= File.join( Dir.mktmpdir( 'tget_' ), 'tget_test_config.rb')
     @options['config_file']= tmp_file
     FileUtils.mkdir_p( File.dirname(tmp_file) )
     new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n#{CONFIG_DELIM}\nfubar=1" )
+    Tget::Main.new(@options).run
     cli(@options).empty?.should == true
+  end
+
+  it "Should populate download_list but not download torrents with --dry-run" do
+    @options['dry_run']=true
+    @options['logger']=TGET_HISTORY
+    @options['config_file']= File.join( Dir.mktmpdir('tget_'), '.tget_cfg' )
+    @options['scraper_dir']= File.join( Dir.mktmpdir('tget_'), 'lib', 'tget', 'scrapers' )
+    fake_torrent= File.join( Dir.mktmpdir('tget_'), 'fake_torrent.txt' )
+    FileUtils.mkdir_p( File.dirname(fake_torrent) )
+    FileUtils.mkdir_p( File.join(@options['scraper_dir'], '99' ))
+    f_t_data="Fubar fubar lorem ipsum et cetera..."
+    new_file( fake_torrent+'1.torrent', f_t_data+'1' )
+    new_file( fake_torrent+'2.torrent', f_t_data+'2' )
+    new_file( fake_torrent+'3.torrent', f_t_data+'3' )
+    search_mthd="
+    def search str
+      if str[/fubar1/i] 
+        Tget::Result.new( '#{fake_torrent+'1.torrent'}', 'Fubar1', 's01e01' ) unless Tget::DList.has?('Fubar1','s01e01')
+      elsif str[/fubar2/i] 
+        Tget::Result.new( '#{fake_torrent+'2.torrent'}', 'Fubar2', 's01e01' ) unless Tget::DList.has?('Fubar2','s01e01')
+      elsif str[/fubar3/i] 
+        Tget::Result.new( '#{fake_torrent+'3.torrent'}', 'Fubar3', 's01e01' ) unless Tget::DList.has?('Fubar3','s01e01')
+      else
+        []
+      end
+    end"
+    config="Fubar1\nFubar2\nFubar3\n"
+    new_file( @options['config_file'], config )
+    new_file( File.join(@options['scraper_dir'], '99', 'fakescraper.rb'), fake_scraper(nil, search_mthd) )
+    results=Tget::Main.new(@options).run
+    Dir.glob( File.join(File.expand_path(@options['download_dir']),'*')).length.should == 0
+    Tget::DList.has?( 'Fubar1', 's01e01' ).should == true
+    Tget::DList.has?( 'Fubar2', 's01e01' ).should == true
+    Tget::DList.has?( 'Fubar3', 's01e01' ).should == true
   end
 
   it "Should show debugging output with --debug option enabled" do
@@ -118,6 +155,9 @@ Done.
         i[0][/^Searching for scrapers/i].nil?.should_not == true
       elsif (i[1][/^Loading: /i] rescue false)
         i[0][/^Loading: /i].nil?.should_not == true
+      elsif (i[1].strip[/Done\.$/i] rescue false)
+        #This line of the output is always unique because it prints a timestamp
+        next
       else
         i[1].should == i[0]
       end
@@ -130,7 +170,7 @@ Done.
     FileUtils.mkdir_p( File.dirname(tmp_file) )
     new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n" )
     @options['config_file']= tmp_file
-    config= Tget::Main.new(@options).load_config
+    config= Tget::Config.load_config(@options)
     config[:shows].length.should == 3
   end
 
@@ -140,7 +180,7 @@ Done.
 
     FileUtils.mkdir_p( File.dirname(tmp_file) )
     new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n#{CONFIG_DELIM}\nfubar=1" )
-    config= Tget::Main.new(@options).load_config
+    config= Tget::Config.load_config(@options)
     config[:shows].length.should == 3
     config['fubar'].should=="1"
   end
@@ -262,10 +302,14 @@ Done.
     new_file( File.join(@options['scraper_dir'], '99', 'fakescraper.rb'), fake_scraper(nil, search_mthd) )
     results=Tget::Main.new(@options).run
     i=1
+    files=["fake_torrent.txt1.torrent",
+           "fake_torrent.txt2.torrent",
+           "fake_torrent.txt3.torrent"]
     Dir.glob(File.join(File.expand_path(@options['download_dir']),'*' )) {|dir|
-      File.basename(dir).should == "fake_torrent.txt#{i}.torrent"
+      files.delete(File.basename(dir)).should_not == nil
       i+=1
     }
+    files.empty?.should == true
   end
 
   it "Should assign a random name appended with '.torrent' if no name provided" do #Can't use show name & ep ID because don't have that info when saving file
@@ -319,6 +363,7 @@ Done.
       File.basename(dir)[/fake_torrent_\[other\.stuff\]\.txt1\.torrent/].nil?.should == false
     }
   end
+
   it "Should not re-download shows that are in options['downloaded_files']" do
     @options['config_file']= File.join( Dir.mktmpdir('tget_'), '.tget_cfg' )
     @options['scraper_dir']= File.join( Dir.mktmpdir('tget_'), 'lib', 'tget', 'scrapers' )
