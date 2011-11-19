@@ -32,7 +32,8 @@ require 'tget/debug'
 require 'tget/main'
 require 'tget/result'
 require 'tget/dlist'
-require 'tget/episodeid.rb'
+require 'tget/episodeid'
+require 'tget/config'
 DLIST_SEP="#GNU_FTW#"
 MAX_RETRIES=0
 CONFIG_DELIM="### Options ###"

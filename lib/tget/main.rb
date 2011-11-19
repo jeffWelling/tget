@@ -37,7 +37,7 @@ module Tget
       @out= options['logger'] || nil    
       debug "Debugging output enabled"
       #config must be loaded after @out is populated to avoid NilClass errors
-      @config=load_config
+      @config=Tget::Config.load_config(@options)
       load_scrapers options
       @results=[]
       puts "Loaded."
@@ -141,47 +141,6 @@ module Tget
           retry
         end
       }
-    end
-    def load_config
-      config={}
-      listing_shows=true
-      config[:shows]=[]
-      unless (file= (File.open(@options['config_file'], 'r') rescue nil))
-        unless @options['silent_mode']
-          puts "Could not open config file: \n#{@options['config_file']}\nCheck permissions?\n\nWithout a config file, we have no shows to search for. Exiting..."
-        end
-        exit
-      end
-      while( line=file.gets )
-        if listing_shows==true
-          if line[Regexp.new(CONFIG_DELIM)]
-            listing_shows=false
-            next
-            debug "Entering config options section"
-          end
-          next if line.strip.empty?
-          config[:shows] << line.strip
-          debug "Adding show '#{line.strip}'"
-        else
-          config[line[/^[^=]*/]]=line.gsub(/^[^=]*=/,'').strip
-        end
-      end
-      file.close
-      if @options['debug']
-        puts"Config:  \n"
-        config.sort {|x,y| x[0].to_s <=> y[0].to_s}.each {|key,value|
-          if key==:shows
-            puts "   Shows: --|"
-            value.each {|show|
-              puts "            #{show}"
-            }
-          else
-            puts "   "+key
-            puts "       "+value
-          end
-        }
-      end
-      config
     end
     private
     def prep_title

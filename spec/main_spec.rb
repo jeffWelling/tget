@@ -130,7 +130,7 @@ Done.
     FileUtils.mkdir_p( File.dirname(tmp_file) )
     new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n" )
     @options['config_file']= tmp_file
-    config= Tget::Main.new(@options).load_config
+    config= Tget::Config.load_config(@options)
     config[:shows].length.should == 3
   end
 
@@ -140,7 +140,7 @@ Done.
 
     FileUtils.mkdir_p( File.dirname(tmp_file) )
     new_file( tmp_file, "Fubar1\nFubar2\nFubar3\n#{CONFIG_DELIM}\nfubar=1" )
-    config= Tget::Main.new(@options).load_config
+    config= Tget::Config.load_config(@options)
     config[:shows].length.should == 3
     config['fubar'].should=="1"
   end
@@ -262,10 +262,14 @@ Done.
     new_file( File.join(@options['scraper_dir'], '99', 'fakescraper.rb'), fake_scraper(nil, search_mthd) )
     results=Tget::Main.new(@options).run
     i=1
+    files=["fake_torrent.txt1.torrent",
+           "fake_torrent.txt2.torrent",
+           "fake_torrent.txt3.torrent"]
     Dir.glob(File.join(File.expand_path(@options['download_dir']),'*' )) {|dir|
-      File.basename(dir).should == "fake_torrent.txt#{i}.torrent"
+      files.delete(File.basename(dir)).should_not == nil
       i+=1
     }
+    files.empty?.should == true
   end
 
   it "Should assign a random name appended with '.torrent' if no name provided" do #Can't use show name & ep ID because don't have that info when saving file
