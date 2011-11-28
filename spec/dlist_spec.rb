@@ -57,4 +57,5 @@ describe Tget::DList do
   end
   it "Should never grow larger than MAX_DF|#{Tget::DList.max_df}"
   it "Should not allow duplicates"
+  it "Should be able to use DList.found to prevent subsequent scrapers from downloading the same episode"
 end
