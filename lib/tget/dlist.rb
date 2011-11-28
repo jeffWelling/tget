@@ -18,6 +18,7 @@ module Tget
   class DList
     @@max_df=1024
     @@downloaded_files=[]
+    @@found_files=[]
     class << self
       include Debug
       attr_reader :max_df
@@ -43,19 +44,36 @@ module Tget
         @@downloaded_files.delete_at(0)
       end
     end
+    def self.found event
+      debug "DList.found() #{event}"
+      unless event.class==String
+        raise ArgumentError, "Event is not a string"
+      end
+      @@found_files << event
+    end
     def self.has? title, id
       raise ArgumentError.new("DList.has?(title,id): id cannot be nil") if id.nil?
       @@downloaded_files || Tget::DList.load
+      @@found_files||=[]
       @@downloaded_files.each {|event|
         if (event[Regexp.new(Regexp.escape(title), 'i')] and event[Regexp.new(Regexp.escape(id), 'i')])
-          debug "DList.has? has #{title}, #{id}, in #{event}"
+          debug "DList.has? has #{title}, #{id}, in #{event} from downloaded_files"
           return true
         elsif (event[Regexp.new(title,'i')] and id.nil?)
-          debug "DList.has? has #{title}, :empty, in #{event}"
+          debug "DList.has? has #{title}, :empty, in #{event} from downloaded_files"
           return true
         end
       }
-      debug "DList.has? does not hass #{title}, #{id}"
+      @@found_files.each {|event|
+        if (event[Regexp.new(Regexp.escape(title), 'i')] and event[Regexp.new(Regexp.escape(id), 'i')])
+          debug "DList.has? has #{title}, #{id}, in #{event} from found_files"
+          return true
+        elsif (event[Regexp.new(title,'i')] and id.nil?)
+          debug "DList.has? has #{title}, :empty, in #{event} from found_files"
+          return true
+        end
+      }
+      debug "DList.has? does not have #{title}, #{id}"
       return false
     end
     def self.save file
