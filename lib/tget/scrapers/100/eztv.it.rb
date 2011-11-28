@@ -40,7 +40,7 @@ module Tget
             end
           end
           if Tget::DList.has?(str, epid.to_s)
-            debug "Skipped because we has it"
+            debug "Skipped because we have it"
             next
           end
           results<< Result.new(main_url, title, epid)

@@ -64,7 +64,7 @@ module Tget
         p_results
         download
       end
-      puts "Done."
+      puts "#{Time.now.to_s} -- Done."
       @results
     end
     def search
@@ -129,10 +129,12 @@ module Tget
           basename= rand(999999999).to_s + ".torrent"
         end
         begin
-          File.open( File.join(download_dir, basename), 'wb' ) {|file| 
-            file.write open(result.download).read
-            debug "Downloaded--|\n     From: #{URI.decode(result.download)}\n     To:   #{File.join(download_dir,basename)}"
-          }
+          unless @options['dry_run']
+            File.open( File.join(download_dir, basename), 'wb' ) {|file| 
+              file.write open(result.download).read
+              debug "Downloaded--|\n     From: #{URI.decode(result.download)}\n     To:   #{File.join(download_dir,basename)}"
+            }
+          end
           Tget::DList.add( result.show + DLIST_SEP + result.ep_id.to_s )
         rescue OpenURI::HTTPError, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, SocketError, Errno::EHOSTUNREACH 
           next if retries > MAX_RETRIES

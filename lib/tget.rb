@@ -56,15 +56,15 @@ module Tget
     opts= OptionParser.new do |opts|
       opts.banner= "tget is a command line .torrent downloader"
 
-      opts.on("--download-to [DIR]", "Directory to download .torrent files to") do |dir|
+      opts.on("--download-to [DIR]", "Directory to download .torrent files to, defaults to ~/Downloads/torrents/") do |dir|
         options['download_dir']= dir
       end
 
-      opts.on("--downloaded_files [PATH]", "Path to substitude downloaded_files list instead of ~/.downloaded_files") do |path|
+      opts.on("--downloaded-files [PATH]", "Path to substitude downloaded_files list instead of ~/.downloaded_files") do |path|
         options['downloaded_files']= path
       end
 
-      opts.on("--config [PATH]", "Path of config file to use instead of default") do |path|
+      opts.on("--config [PATH]", "Path of config file to use instead of default ~/.tget_cfg") do |path|
         options['config_file']= path
       end
 
@@ -80,20 +80,24 @@ module Tget
         options['working_dir']= path
       end
 
+      opts.on("--silent", "Silence all output") do |v|
+        options['silent_mode']=true
+      end
+
       opts.on("--debug", "Activate debug logging") do |v|
-        if options['silent']==true
+        if options['silent_mode']==true
           puts "--silent and --debug are mutually exclusive, cannot use both"
           raise ArgumentError
         end
         options['debug']=true
       end
 
-      opts.on("--silent", "Silence all output") do |v|
-        options['silent_mode']=true
-      end
-
       opts.on("--timeout SECONDS", "Number of seconds to wait for execution of a scraper to complete") do |v|
         options['timeout']=v.to_i
+      end
+
+      opts.on("--dry-run", "Run, add to downloaded_files list, but don't download torrents -- used to calibrate tget") do |v|
+        options['dry_run']=true
       end
     end
     opts.parse!
