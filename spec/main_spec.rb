@@ -394,5 +394,12 @@ Done.
       File.basename(dir)[/fake_torrent_\[other\.stuff\]\.txt1\.torrent/].nil?.should == true
     }
   end
+  it "Should add an item to the DList as soon as it is added to results to prevent duplicates from other scrapers"
+    #In the design where DList.has? is called while searching and DList.add is called when the file is downloaded
+    #a bug can manifest which allows duplicates. This happens when, within the same run of the program, the same
+    #episode becomes available on multiple sites. Because all sites are searched before downloading any of the
+    #files, tget can end up downloading multiple copies of the same file.
+    #If DList.add is called before the file is downloaded, care must be taken to make sure that if the download
+    #fails then the episode is removed from DList.
 
 end

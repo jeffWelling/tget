@@ -56,4 +56,5 @@ describe Tget::DList do
     contents[/^.*\n/].should == "Fubar"+DLIST_SEP+"gonzo\n"
   end
   it "Should never grow larger than MAX_DF|#{Tget::DList.max_df}"
+  it "Should not allow duplicates"
 end
