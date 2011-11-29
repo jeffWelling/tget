@@ -115,6 +115,9 @@ module Tget
     def download
       puts "Downloading #{@results.length} .torrent files..."
       return 0 if @results.empty?
+      @results.each {|result|
+        raise "Main.download(): @results can only contain objects of type Tget::Result" unless result.class==Tget::Result
+      }
       if @options['download_dir'][/\/$/].nil?
         download_dir=@options['download_dir'] + '/'
       else

@@ -33,7 +33,7 @@ describe Tget::Main do
     these_be_options @options
   end
 
-  after(:all) do
+  after(:each) do
     FileUtils.rm_rf( Dir.glob(File.join( File.dirname( Dir.mktmpdir ),'tget_*')) )
   end
 
@@ -278,6 +278,9 @@ Done.
   it "Should download to options['download_dir']" do
     @options['config_file']= File.join( Dir.mktmpdir('tget_'), '.tget_cfg' )
     @options['scraper_dir']= File.join( Dir.mktmpdir('tget_'), 'lib', 'tget', 'scrapers' )
+    @options['downloaded_files']=File.join( Dir.mktmpdir('tget_dlfiles'), 'downloaded_files.txt' )
+    Tget::DList.load @options['downloaded_files']
+    FileUtils.touch @options['downloaded_files']
     fake_torrent= File.join( Dir.mktmpdir('tget_'), 'fake_torrent.txt' )
     FileUtils.mkdir_p( File.dirname(fake_torrent) )
     FileUtils.mkdir_p( File.join(@options['scraper_dir'], '99' ))
@@ -288,11 +291,20 @@ Done.
     search_mthd="
     def search str
       if str[/fubar1/i] 
-        Tget::Result.new( '#{fake_torrent+'1.torrent'}', 'Fubar1', 's01e01' )
+        unless Tget::DList.has?('Fubar1', 's01e01')
+          Tget::DList.found( 'Fubar1'+DLIST_SEP+'s01e01' )
+          return Tget::Result.new( '#{fake_torrent+'1.torrent'}', 'Fubar1', 's01e01' ) 
+        end
       elsif str[/fubar2/i] 
-        Tget::Result.new( '#{fake_torrent+'2.torrent'}', 'Fubar2', 's01e01' ) 
+        unless Tget::DList.has?('Fubar2', 's01e01')
+          Tget::DList.found( 'Fubar2'+DLIST_SEP+'s01e01' )
+          return Tget::Result.new( '#{fake_torrent+'2.torrent'}', 'Fubar2', 's01e01' ) 
+        end
       elsif str[/fubar3/i] 
-        Tget::Result.new( '#{fake_torrent+'3.torrent'}', 'Fubar3', 's01e01' ) 
+        unless Tget::DList.has?('Fubar3', 's01e01')
+          Tget::DList.found( 'Fubar3'+DLIST_SEP+'s01e01' )
+          return Tget::Result.new( '#{fake_torrent+'3.torrent'}', 'Fubar3', 's01e01' ) 
+        end
       else
         []
       end
@@ -301,13 +313,11 @@ Done.
     new_file( @options['config_file'], config )
     new_file( File.join(@options['scraper_dir'], '99', 'fakescraper.rb'), fake_scraper(nil, search_mthd) )
     results=Tget::Main.new(@options).run
-    i=1
     files=["fake_torrent.txt1.torrent",
            "fake_torrent.txt2.torrent",
            "fake_torrent.txt3.torrent"]
     Dir.glob(File.join(File.expand_path(@options['download_dir']),'*' )) {|dir|
       files.delete(File.basename(dir)).should_not == nil
-      i+=1
     }
     files.empty?.should == true
   end
@@ -323,7 +333,10 @@ Done.
     search_mthd="
     def search str
       if str[/fubar1/i] 
-        Tget::Result.new( '#{fake_torrent+'1'}', 'Fubar1', 's01e01' )
+        unless Tget::DList.has?( 'Fubar1', 's01e01' )
+          Tget::DList.found( 'Fubar1', 's01e01' )
+          Tget::Result.new( '#{fake_torrent+'1'}', 'Fubar1', 's01e01' )
+        end
       else
         []
       end
@@ -349,7 +362,10 @@ Done.
     search_mthd="
     def search str
       if str[/fubar1/i] 
-        Tget::Result.new( '#{fake_torrent+'1.torrent'}', 'Fubar1', 's01e01' )
+        unless Tget::DList.has?( 'Fubar1', 's01e01' )
+          Tget::DList.found( 'Fubar1', 's01e01' )
+          Tget::Result.new( '#{fake_torrent+'1.torrent'}', 'Fubar1', 's01e01' )
+        end
       else
         []
       end

@@ -75,4 +75,13 @@ module TgetSpecHelper
       yield(line.strip)
     end
   end
+  def random_string length=8
+    (0...length).map{97.+(rand(25)).chr}.join.capitalize
+  end
+  def random_episode_id
+    "s#{rand(9)}#{rand(9)}e#{rand(9)}#{rand(9)}"
+  end
+  def event show, epid
+    show+DLIST_SEP+epid
+  end
 end

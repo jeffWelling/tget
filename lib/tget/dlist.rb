@@ -40,6 +40,10 @@ module Tget
       unless event.class==String
         raise ArgumentError, "Event is not a string"
       end
+      if @@downloaded_files.include? event
+        raise "DList.add(event): event already exists in downloaded_files"
+      end
+
       @@downloaded_files << event
 
       while( @@downloaded_files.size > @max_df )
