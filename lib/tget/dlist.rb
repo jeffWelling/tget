@@ -16,14 +16,16 @@
 #
 module Tget
   class DList
-    @@max_df=1024
-    @@downloaded_files=[]
-    @@found_files=[]
     class << self
       include Debug
-      attr_reader :max_df
+      def max_df
+        @max_df
+      end
     end
     def self.load filename
+      @max_df=1024
+      @@downloaded_files=[]
+      @@found_files=[]
       if( file=(File.open(File.expand_path(filename), 'r') rescue nil) )
         while( line=file.gets )
           next if line.strip.empty?
@@ -40,7 +42,7 @@ module Tget
       end
       @@downloaded_files << event
 
-      while( @@downloaded_files.size > @@max_df )
+      while( @@downloaded_files.size > @max_df )
         @@downloaded_files.delete_at(0)
       end
     end
@@ -78,7 +80,7 @@ module Tget
     end
     def self.save file
       raise ArgumentError unless file.class==String
-      while( @@downloaded_files.size > @@max_df )
+      while( @@downloaded_files.size > @max_df )
         @@downloaded_files.delete_at(0)
       end
       File.open(file, 'w') {|f|
