@@ -23,7 +23,7 @@ module Tget
       return true if ep_id.class== Tget::EpisodeID
       false
     end
-    def initialize(url, show, ep_id)
+    def initialize(url, show, ep_id, seeds=false)
       raise ArgumentError unless (!url.nil? and !show.nil? and !ep_id.nil?)
       if ep_id.class==String
         ep_id=Tget::EpisodeID.new(ep_id)
@@ -43,6 +43,7 @@ module Tget
       @show= show
       @ep_id= ep_id
       @alt_urls=[]
+      @seeds=seeds
     end
     attr_reader :show, :ep_id, :url, :alt_urls
     def add_alt_urls x
@@ -56,11 +57,20 @@ module Tget
       to_s
     end
     def to_s
-      o="Result Object:\nShow: #{@show}\nEpID: #{@ep_id}\nDownload URL: #{@url}"
+      o="Result Object:\nShow: #{@show}\nEpID: #{@ep_id}\nDownload URL: #{@url}\nSeeds: #{@seeds}\n"
       @alt_urls.each {|alt_url|
         o+="\nAlt DL URL: #{alt_url}"
       }
       o
+    end
+    def seeds
+      @seeds
+    end
+    def seeds= seeds
+      @seeds= seeds
+    end
+    def <=> b
+      @seeds <=> b.seeds
     end
     private
     #FIXME

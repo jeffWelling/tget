@@ -43,6 +43,7 @@ module Tget
             debug "Skipped because we have it"
             next
           end
+          Tget::DList.found str, ep_id.to_s
           results<< Result.new(main_url, title, epid)
         end
       }

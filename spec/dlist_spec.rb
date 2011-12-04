@@ -86,6 +86,7 @@ describe Tget::DList do
   it "Should be able to use DList.found to prevent subsequent scrapers from downloading the same episode" do
     @options['config_file']= File.join( Dir.mktmpdir('tget_'), '.tget_cfg' )
     @options['scraper_dir']= File.join( Dir.mktmpdir('tget_'), 'lib', 'tget', 'scrapers' )
+    @options['download_dir']=Dir.mktmpdir('tget_downloaddir_')
     fake_torrent1= File.join( Dir.mktmpdir('tget_'), 'fake_torrent1_[other.stuff].txt' )
     fake_torrent2= File.join( Dir.mktmpdir('tget_'), 'fake_torrent2_[other.stuff].txt' )
     FileUtils.mkdir_p( File.dirname(fake_torrent1) )

@@ -49,25 +49,32 @@ module Tget
         end
         result.seeds= seeds
         pre_results[str+epid.to_s]||=[]
-        if [seeds,result].length < 2
-          raise "the fuck?"
-        end
         if seeds.to_i >= @options['min_seeds']
-          pre_results[str+epid.to_s]<<[seeds.to_i,result]
+          pre_results[str+epid.to_s] << result
         end
       }
       pre_results.each_key {|key|
         unless pre_results[key].empty?
           debug "For each of result identified by '#{key}'..."
+          pre_results[key]=pre_results[key].sort
           pre_results[key].each {|r|
-            debug r[1].seeds+" seeds"
+            debug r.seeds+" seeds"
           }
-          debug "We will use the one with #{pre_results[key].sort.reverse[0][1].seeds} seeds"
-          if Tget::DList.has?(str,pre_results[key].sort.reverse[0][1].ep_id.to_s)
-            debug "Skipped because we have it"
-            next
+          begin
+            puts "Current preresults..."
+            pp pre_results[key]
+            debug "We will use the one with #{pre_results[key][-1].seeds} seeds"
+            if Tget::DList.has?(str,pre_results[key][-1].ep_id.to_s)
+              debug "Skipped because we have it"
+              next
+            end
+            Tget::DList.found( str,pre_results[key][-1].ep_id.to_s )
+          rescue
+            puts "FAILED preresults"
+            pp pre_results[key]
+            raise
           end
-          results<<pre_results[key].sort[0][1]
+          results<<pre_results[key].sort[0]
         end
       }
       results

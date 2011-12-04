@@ -36,9 +36,10 @@ module Tget
               debug "Skipped because we have it"
               next
             end
+            Tget::DList.found str, ep_id.to_s
             results << Tget::Result.new( torrent.link, str,  ep_id )
           else
-            debug "Could not not match #{str} to #{torrent.title}"
+            debug "Could not match #{str} to #{torrent.title}"
           end
         }
       rescue
