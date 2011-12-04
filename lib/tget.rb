@@ -110,4 +110,7 @@ module Tget
       warn "Tget is already running"
     end
   end
+  def event show epid
+    show + DLIST_SEP + epid
+  end
 end
