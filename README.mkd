@@ -14,3 +14,14 @@ as well as the Ruby gems;
 
 nokogiri
 
+
+
+After installing `tget` and running it without telling it what shows to download, you will see this output;
+
+	jeff@home:~/Documents/tget$ bin/tget --download-to /home/jeff/Downloads/torrents 
+	Could not open config file: 
+	/home/jeff/.tget_cfg
+	Check permissions?
+
+	Without a config file, we have no shows to search for. Exiting...
+
