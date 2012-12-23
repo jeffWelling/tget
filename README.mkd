@@ -3,3 +3,14 @@ tget is a simple command line utility to search torrent sites and download torre
 We have a [Design Doc on the wiki](https://github.com/jeffWelling/tget/wiki/Design-Doc).
 
 More documentation coming soon.
+
+
+To install Tget on a Debian stable system, you will need to have;
+
+- libxml2-dev
+- libxslt1-dev
+
+as well as the Ruby gems;
+
+nokogiri
+
